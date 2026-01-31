@@ -1,0 +1,14 @@
+# Python Virtual Environment
+venv/
+.env
+
+# Byte-compiled / Optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Mac specific
+.DS_Store
+
+# IDE specific
+.vscode/
+.idea/

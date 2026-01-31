@@ -1,0 +1,33 @@
+VEHICLE SERVICE MANUAL - MODEL YEAR 2022
+SECTION: ENGINE PERFORMANCE
+
+DTC P0300 - Random/Multiple Cylinder Misfire Detected
+Description:
+A random or multiple cylinder misfire has been detected. This indicates that the engine is not burning fuel efficiently in multiple cylinders.
+
+Possible Causes:
+1. Ignition System: Faulty spark plugs, ignition coils, or ignition cables.
+2. Fuel System: Low fuel pressure, clogged fuel injectors, or contaminated fuel.
+3. Intake System: Vacuum leaks (intake manifold gasket, vacuum hoses, PCV valve).
+4. Mechanical: Low engine compression, timing belt/chain skipped.
+
+Diagnostic Steps:
+1. Check for other DTCs. If P0171 (System Lean) is present, suspect a vacuum leak.
+2. Inspect Vacuum Hoses: Check for hissing sounds or cracked hoses. Smoke test recommended.
+3. Inspect Spark Plugs: Remove and check for wear, fouling, or incorrect gap.
+4. Check Fuel Pressure: Verify pressure is within 45-55 PSI range.
+
+Repair Procedures:
+- Vacuum Leak Repair: Locate leak using smoke machine. Remove intake manifold if gasket is leaking. Clean surfaces. Install new gasket (Part #99-123). Torque bolts to 18 ft-lbs in star pattern.
+- Spark Plug Replacement: Remove ignition coils. Remove old plugs. Install new plugs (Gap 0.044"). Torque to 12 ft-lbs.
+
+---------------------------------------------------
+
+DTC P0171 - System Too Lean (Bank 1)
+Description:
+The oxygen sensor detected that the air-fuel mixture is too lean (too much air, not enough fuel).
+
+Possible Causes:
+1. Vacuum leaks (most common).
+2. Weak fuel pump.
+3. Dirty Mass Air Flow (MAF) sensor.

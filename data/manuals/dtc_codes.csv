@@ -1,0 +1,6 @@
+code,description,symptoms
+P0300,Random/Multiple Cylinder Misfire Detected,"Rough idle, jerking, flashing CEL"
+P0171,System Too Lean (Bank 1),"Hesitation, poor fuel economy"
+P0420,Catalyst System Efficiency Below Threshold,"Sulfur smell, check engine light"
+P0442,Evaporative Emission System Leak Detected (Small Leak),Gas smell near cap
+OEM-991,Hybrid Battery Cooling Fan Malfunction (Synthetic),"Overheating warning, fan noise"
