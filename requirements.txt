@@ -1,9 +1,14 @@
-langchain
+# --- Core Frameworks ---
+langflow==1.7.2
+langchain==0.3.23
+langchain-core==0.3.76        # Satisfies langflow, aws, openai, etc.
+langchain-community==0.3.21   # Satisfies langflow requirement (>=0.3.21)
+langchain-google-genai==2.0.6 # The specific version langflow expects
+
+# --- Agent Logic ---
 langgraph
-langchain-openai
-langchain-community
-chromadb
-pypdf
+
+# --- Tools ---
+duckduckgo-search
+mcp
 python-dotenv
-pandas
-streamlit
