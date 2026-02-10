@@ -52,85 +52,66 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Handle User Input
-# if prompt := st.chat_input("Describe the problem (e.g., 'My car is shaking')..."):
-#     # 1. Display User Message
-#     st.session_state.messages.append({"role": "user", "content": prompt})
-#     with st.chat_message("user"):
-#         st.markdown(prompt)
-
-#     # 2. Prepare the State for the Agents
-#     # We inject the sidebar data so the agents can "read" the car
-#     initial_state = {
-#         "messages": [prompt],
-#         "user_complaint": prompt,
-#         "dtc_codes": selected_dtcs,
-#         "sensor_data": sensor_snapshot,
-#         # Initialize empty fields
-#         "root_causes": [],
-#         "repair_plan": {},
-#         "next_step": ""
-#     }
-
-#     # 3. Run the Agent Graph
-#     with st.chat_message("assistant"):
-#         message_placeholder = st.empty()
-#         full_response = ""
-        
-#         # We use a status container to show the "Thinking" process
-#         with st.status("🤖 AI Agents working...", expanded=True) as status:
-#             app = st.session_state.app
-            
-#             try:
-#                 # Stream events from LangGraph
-#                 for event in app.stream(initial_state):
-#                     for key, value in event.items():
-                        
-#                         # Service Advisor Log
-#                         if key == "advisor":
-#                             if value.get("next_step") == "ask_user":
-#                                 status.write("❌ Advisor: Need more info.")
-#                                 full_response = value["messages"][0]
-#                             else:
-#                                 status.write("✅ Advisor: Data complete. Handing off to Diagnostics...")
-                        
-#                         # Diagnostic Log
-#                         elif key == "diagnostic":
-#                             causes = value.get("root_causes", [])
-#                             if causes:
-#                                 top_cause = causes[0].get('root_cause', 'Unknown')
-#                                 status.write(f"🔧 Diagnostician: Identified root cause -> **{top_cause}**")
-                        
-#                         # Repair Log
-#                         elif key == "repair":
-#                             status.write("🛠️ Technician: Drafting repair plan...")
-#                             full_response = value["messages"][0]
-
-#                 status.update(label="Response Ready!", state="complete", expanded=False)
-                
-#                 # Show Final Output
-#                 message_placeholder.markdown(full_response)
-#                 st.session_state.messages.append({"role": "assistant", "content": full_response})
-                
-#             except Exception as e:
-#                 st.error(f"An error occurred: {e}")
-
-# --- PASTE THIS NEW BLOCK ---
-if prompt := st.chat_input("Describe the problem..."):
-    # 1. Show User Message
+# Handle User Input
+if prompt := st.chat_input("Describe the problem (e.g., 'My car is shaking')..."):
+    # 1. Display User Message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # 2. Get Response from LangFlow
+    # 2. Prepare the State for the Agents
+    # We inject the sidebar data so the agents can "read" the car
+    initial_state = {
+        "messages": [prompt],
+        "user_complaint": prompt,
+        "dtc_codes": selected_dtcs,
+        "sensor_data": sensor_snapshot,
+        # Initialize empty fields
+        "root_causes": [],
+        "repair_plan": {},
+        "next_step": ""
+    }
+
+    # 3. Run the Agent Graph
     with st.chat_message("assistant"):
-        with st.spinner("🤖 Consulting LangFlow Agent..."):
+        message_placeholder = st.empty()
+        full_response = ""
+        
+        # We use a status container to show the "Thinking" process
+        with st.status("🤖 AI Agents working...", expanded=True) as status:
+            app = st.session_state.app
             
-            # Combine the user prompt with the sidebar codes
-            full_context = f"{prompt}. (Active DTC Codes: {selected_dtcs})"
-            
-            # Call our new function
-            ai_response = run_langflow(full_context)
-            
-            st.markdown(ai_response)
-            st.session_state.messages.append({"role": "assistant", "content": ai_response})
+            try:
+                # Stream events from LangGraph
+                for event in app.stream(initial_state):
+                    for key, value in event.items():
+                        
+                        # Service Advisor Log
+                        if key == "advisor":
+                            if value.get("next_step") == "ask_user":
+                                status.write("❌ Advisor: Need more info.")
+                                full_response = value["messages"][0]
+                            else:
+                                status.write("✅ Advisor: Data complete. Handing off to Diagnostics...")
+                        
+                        # Diagnostic Log
+                        elif key == "diagnostic":
+                            causes = value.get("root_causes", [])
+                            if causes:
+                                top_cause = causes[0].get('root_cause', 'Unknown')
+                                status.write(f"🔧 Diagnostician: Identified root cause -> **{top_cause}**")
+                        
+                        # Repair Log
+                        elif key == "repair":
+                            status.write("🛠️ Technician: Drafting repair plan...")
+                            full_response = value["messages"][0]
+
+                status.update(label="Response Ready!", state="complete", expanded=False)
+                
+                # Show Final Output
+                message_placeholder.markdown(full_response)
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
+                
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
             

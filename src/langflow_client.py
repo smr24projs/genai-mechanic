@@ -3,11 +3,14 @@ import json
 import uuid
 
 # --- CONFIGURATION ---
-# I took this URL directly from your screenshot:
-BASE_URL = "http://localhost:7860/api/v1/run/474947e5-2296-4de5-98d0-91a2d23b3c54"
+import os
+from dotenv import load_dotenv
 
-# PASTE YOUR KEY HERE (keep the quotes!)
-LANGFLOW_API_KEY = "sk-shFOBwZ8kJxwMw5wlxZzT8ekBdKsRuXhRZcPJZQXhAc" 
+load_dotenv()
+
+# Load from .env, with fallbacks or empty strings if not set
+BASE_URL = os.getenv("LANGFLOW_BASE_URL", "http://localhost:7860/api/v1/run/YOUR_FLOW_ID")
+LANGFLOW_API_KEY = os.getenv("LANGFLOW_API_KEY", "")
 # ---------------------
 
 def run_langflow(message: str):
