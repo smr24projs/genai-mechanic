@@ -421,6 +421,17 @@ with st.sidebar:
     st.success("✅ System Online")
     st.info("🧠 Brain: Gemini 2.5 Flash")
     
+    # --- Cascade Pipeline Status ---
+    st.markdown("### 🔄 Diagnostic Pipeline")
+    st.markdown("""
+    **Cascade Order:**
+    1. 🤖 **ML Model** (Random Forest) — Confidence scored
+    2. 📖 **RAG** (AstraDB Manuals) — Fallback if ML < 60%
+    3. 🌍 **Web Search** (Tavily) — Final fallback
+    
+    Best confidence wins!
+    """)
+    
     # --- Vision Diagnostics ---
     st.markdown("### 📸 Vision Diagnostics")
     uploaded_file = st.file_uploader("Upload Image", type=["jpg", "png", "jpeg"])

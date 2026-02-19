@@ -1,9 +1,9 @@
-# --- Core Frameworks ---
-langflow==1.7.2
+
 langchain==0.3.23
 langchain-core==0.3.76        # Satisfies langflow, aws, openai, etc.
 langchain-community==0.3.21   # Satisfies langflow requirement (>=0.3.21)
 langchain-google-genai==2.0.6 # The specific version langflow expects
+langchain-astradb             # RAG vector store (AstraDB)
 
 # --- Agent Logic ---
 langgraph
@@ -12,3 +12,10 @@ langgraph
 duckduckgo-search
 mcp
 python-dotenv
+tavily-python                 # Web search tool
+
+# --- ML Model ---
+scikit-learn
+joblib
+pandas
+numpy

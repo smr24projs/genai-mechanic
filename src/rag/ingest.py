@@ -11,8 +11,12 @@ load_dotenv()
 # Verify Keys
 if not os.getenv("ASTRA_DB_APPLICATION_TOKEN"):
     raise ValueError("❌ ERROR: ASTRA_DB_APPLICATION_TOKEN not found in .env")
-if not os.getenv("GOOGLE_API_KEY"):
-    raise ValueError("❌ ERROR: GOOGLE_API_KEY not found in .env")
+
+# Support both GEMINI_API_KEY and GOOGLE_API_KEY
+api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+if not api_key:
+    raise ValueError("❌ ERROR: GEMINI_API_KEY or GOOGLE_API_KEY not found in .env")
+os.environ["GOOGLE_API_KEY"] = api_key  # Ensure the embeddings library can find it
 
 def ingest_manuals():
     print("🚀 Starting Ingestion Process...")
@@ -32,7 +36,8 @@ def ingest_manuals():
     )
 
     # 3. Load the PDF
-    pdf_path = os.path.join(os.path.dirname(__file__), "D:/sem8/GenAI project/vehicle-diagnostics/data/manuals/DTC_Codes.pdf")
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+    pdf_path = os.path.join(project_root, "data", "manuals", "DTC_Codes.pdf")
     
     if not os.path.exists(pdf_path):
         print(f"❌ ERROR: File not found at {pdf_path}")

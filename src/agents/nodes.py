@@ -14,7 +14,7 @@ if not os.getenv("GEMINI_API_KEY"):
     raise ValueError("GEMINI_API_KEY not found in .env")
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash", # Fast and efficient
+    model="gemini-1.5-flash", # Fast and efficient
     google_api_key=os.getenv("GEMINI_API_KEY"),
     temperature=0
 )
