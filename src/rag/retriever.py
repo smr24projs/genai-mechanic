@@ -52,34 +52,108 @@
 #         args_schema=DiagnosticInput
 #     )
 
+
+
+# import os
+# from langchain_community.vectorstores import AstraDB
+# from langchain_google_genai import GoogleGenerativeAIEmbeddings
+# from langchain_core.tools import StructuredTool
+# from pydantic import BaseModel, Field
+
+# # 1. Connect to AstraDB
+# def get_vectorstore():
+#     api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
+#     token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
+    
+#     if not api_endpoint or not token:
+#         return None
+
+#     embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+    
+#     return AstraDB(
+#         embedding=embeddings,
+#         collection_name="vehicle_manuals_v2",
+#         api_endpoint=api_endpoint,
+#         token=token,
+#     )
+
+# # 2. Input Schema
+# class RAGInput(BaseModel):
+#     query: str = Field(description="The diagnostic query (e.g., 'P0300 causes' or 'oil capacity').")
+
+# # 3. The Tool Function
+# def query_manuals(query: str) -> str:
+#     """
+#     Searches the vehicle service manuals for the given query.
+#     Returns the relevant text segments as a single string.
+#     """
+#     try:
+#         print(f"\n[DEBUG] Searching AstraDB for: {query}")
+#         vstore = get_vectorstore()
+#         if not vstore:
+#             return "Error: Database connection failed. Check .env variables."
+
+#         # Perform Search
+#         results = vstore.similarity_search(query, k=4)
+        
+#         if not results:
+#             return "No relevant information found in the uploaded manuals."
+
+#         # FIX: Convert the list of Documents into a single clean string
+#         # This prevents the 'Name cannot be empty' error in the Gemini API
+#         formatted_response = "Found the following info in manuals:\n"
+#         for i, doc in enumerate(results):
+#             content = doc.page_content.replace("\n", " ") # Remove messy line breaks
+#             formatted_response += f"--- Result {i+1} ---\n{content}\n\n"
+            
+#         return formatted_response
+
+#     except Exception as e:
+#         return f"Error querying database: {str(e)}"
+
+# # 4. Create the Tool
+# def get_rag_tool():
+#     return StructuredTool.from_function(
+#         func=query_manuals,
+#         name="vehicle_diagnostic_db",
+#         description="Searches official service manuals. Use this for codes, torque specs, and wiring.",
+#         args_schema=RAGInput
+#     )
+
+
 import os
-from langchain_community.vectorstores import AstraDB
+from langchain_astradb import AstraDBVectorStore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
-# 1. Connect to AstraDB
+# 1. Connect to AstraDB with Gemini Embeddings
 def get_vectorstore():
+    # Load credentials from .env
     api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
     token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
+    collection = os.getenv("ASTRA_DB_COLLECTION", "vehicle_manuals_v2") # Default to v2 if missing
     
     if not api_endpoint or not token:
+        print("❌ Error: Missing AstraDB credentials in .env")
         return None
 
+    # SPECIFIC UPDATE: Use "models/gemini-embedding-001"
     embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
     
-    return AstraDB(
+    # Connect to the Vector Store using the modern class
+    return AstraDBVectorStore(
         embedding=embeddings,
-        collection_name="vehicle_manuals_v2",
+        collection_name=collection,
         api_endpoint=api_endpoint,
         token=token,
     )
 
-# 2. Input Schema
+# 2. Input Schema for the Tool
 class RAGInput(BaseModel):
     query: str = Field(description="The diagnostic query (e.g., 'P0300 causes' or 'oil capacity').")
 
-# 3. The Tool Function
+# 3. The Search Logic
 def query_manuals(query: str) -> str:
     """
     Searches the vehicle service manuals for the given query.
@@ -91,17 +165,17 @@ def query_manuals(query: str) -> str:
         if not vstore:
             return "Error: Database connection failed. Check .env variables."
 
-        # Perform Search
+        # Perform Similarity Search (Top 4 results)
         results = vstore.similarity_search(query, k=4)
         
         if not results:
             return "No relevant information found in the uploaded manuals."
 
-        # FIX: Convert the list of Documents into a single clean string
-        # This prevents the 'Name cannot be empty' error in the Gemini API
+        # Format results into a clean string for the Agent
         formatted_response = "Found the following info in manuals:\n"
         for i, doc in enumerate(results):
-            content = doc.page_content.replace("\n", " ") # Remove messy line breaks
+            # Clean up newlines to make it easier for the LLM to read
+            content = doc.page_content.replace("\n", " ") 
             formatted_response += f"--- Result {i+1} ---\n{content}\n\n"
             
         return formatted_response
@@ -109,11 +183,11 @@ def query_manuals(query: str) -> str:
     except Exception as e:
         return f"Error querying database: {str(e)}"
 
-# 4. Create the Tool
+# 4. Export the Tool
 def get_rag_tool():
     return StructuredTool.from_function(
         func=query_manuals,
         name="vehicle_diagnostic_db",
-        description="Searches official service manuals. Use this for codes, torque specs, and wiring.",
+        description="Searches official service manuals. Use this for specific codes, torque specs, and wiring diagrams.",
         args_schema=RAGInput
     )

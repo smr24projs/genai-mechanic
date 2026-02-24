@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "query": "My 2018 Ford F-150 has a flashing check engine light and shakes at idle.",
+    "output": "Critical Error: Invalid argument provided to Gemini: 400 * GenerateContentRequest.contents[5].parts[0].function_response.name: Name cannot be empty.\n",
+    "score": 0,
+    "latency": 0
+  },
+  {
+    "id": 2,
+    "query": "Code P0133 on a 2015 Chevy Silverado.",
+    "output": "**ML Analysis**: 99.69%\n**Web Ranking**:\n1. Official Vehicle Service Manual (85%)\n2. caradvise.com (75%)\n3. autozone.com (70%)\n**Verdict**: ML Classification wins with 99.69%\n**Final Diagnosis**: O2 Sensor Slow Response (Bank 1 Sensor 1)\n\n**Action Plan**:\n1.  **Safety**: While the vehicle may be drivable, a P0133 code can lead to reduced fuel efficiency and increased emissions. Prolonged driving with this issue could potentially lead to catalytic converter damage. It is recommended to address this issue promptly.\n2.  **Verification**:\n    *   Visually inspect the Bank 1 Sensor 1 oxygen sensor and its electrical connector and wiring for any signs of damage, corrosion, or loose connections.\n    *   Check for any exhaust leaks upstream of the Bank 1 Sensor 1 oxygen sensor, as these can affect sensor readings.\n    *   Using a diagnostic scan tool, monitor the live data for the Bank 1 Sensor 1 oxygen sensor's voltage readings and switching frequency. Compare these readings to specifications to confirm a slow response. Also, check fuel trim values and Mass Air Flow (MAF) sensor readings for any anomalies.\n3.  **Repair**:\n    *   If the Bank 1 Sensor 1 oxygen sensor is confirmed to be faulty or exhibiting a slow response, replace it with a new, high-quality sensor.\n    *   Repair any identified exhaust leaks, wiring issues, or other contributing factors such as a contaminated MAF sensor or issues with fuel delivery.\n    *   After repairs, clear the Diagnostic Trouble Code (DTC) from the Powertrain Control Module (PCM) and perform a test drive to ensure the issue is resolved and the code does not reappear.",
+    "score": 10,
+    "latency": 26.608463287353516
+  },
+  {
+    "id": 3,
+    "query": "Mahindra XUV500 losing power and black smoke from exhaust.",
+    "output": "Critical Error: Invalid argument provided to Gemini: 400 * GenerateContentRequest.contents[5].parts[0].function_response.name: Name cannot be empty.\n",
+    "score": 0,
+    "latency": 0
+  }
+]
