@@ -31,12 +31,14 @@ def ingest_manuals():
         token=os.getenv("ASTRA_DB_APPLICATION_TOKEN"),
     )
 
-    # 3. Load the PDF
-    pdf_path = os.path.join(os.path.dirname(__file__), "D:/sem8/GenAI project/vehicle-diagnostics/data/manuals/DTC_Codes.pdf")
+    # 3. Load the PDF — use path relative to this script's location
+    pdf_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "manuals", "DTC_Codes.pdf")
+    pdf_path = os.path.abspath(pdf_path)
     
     if not os.path.exists(pdf_path):
         print(f"❌ ERROR: File not found at {pdf_path}")
         return
+
 
     print(f"   - Loading file: {pdf_path}")
     loader = PyPDFLoader(pdf_path)

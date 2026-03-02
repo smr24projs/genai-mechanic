@@ -1,0 +1,519 @@
+2026-03-02 13:30:06 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 13:30:06 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 13:35:25 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 13:35:25 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 16:16:01 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 16:16:01 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 16:18:00 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 16:18:00 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 16:18:18 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 16:18:18 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 19:27:15 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 19:27:15 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 19:32:36 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 19:32:36 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 19:38:17 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 19:38:17 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 19:38:42 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 19:38:42 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 19:52:10 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 19:52:10 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 19:52:47 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 19:52:47 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 19:53:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 19:53:09 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-02 20:08:16 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:08:16 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:08:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:08:44 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:10:21 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:10:21 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:10:53 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:10:53 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:11:00 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:11:00 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:13:02 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:13:02 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:13:05 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:13:05 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:13:32 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:13:32 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:13:38 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:13:38 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:14:17 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:14:17 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:14:26 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:14:26 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:15:08 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:15:08 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:15:15 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:15:15 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:15:59 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:15:59 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:12 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:12 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:17 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:17 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:20 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:20 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:25 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:25 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:34 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:34 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:36 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:36 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:36 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:36 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:43 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:43 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:48 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:48 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:51 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:51 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:16:53 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:16:53 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:17:02 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:17:02 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:17:04 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:17:04 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:17:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:17:09 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:20:45 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:20:45 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:21:14 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 24918.04ms
+2026-03-02 20:21:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:21:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:34:13 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:34:13 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:34:47 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 24467.26ms
+2026-03-02 20:34:47 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:34:47 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:37:33 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:37:33 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:37:33 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:37:33 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:37:46 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:37:46 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:37:52 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:37:52 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:38:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:38:09 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:38:16 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:38:16 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:38:34 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:38:34 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:38:39 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:38:39 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:38:47 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:38:47 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:39:23 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:39:23 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:39:23 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:39:23 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:39:28 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:39:28 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:39:38 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:39:38 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:39:48 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:39:48 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:39:51 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:39:51 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:40:01 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:40:01 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:40:03 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:40:03 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:40:05 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:40:05 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:40:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:40:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:40:18 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:40:18 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:40:46 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 19662.30ms
+2026-03-02 20:40:46 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:40:46 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:42:32 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:42:32 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:42:40 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:42:40 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:44:51 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:44:51 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:45:13 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:45:13 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:45:15 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:45:15 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:45:18 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:45:18 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:45:18 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:45:18 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:45:25 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:45:25 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:46:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:46:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:46:16 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:46:16 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:46:17 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:46:17 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:46:19 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:46:19 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:46:20 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:46:20 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:46:26 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:46:26 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:47:40 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:47:40 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:47:45 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:47:45 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:49:58 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:49:58 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:50:46 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:50:46 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:50:52 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:50:52 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:50:52 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:50:52 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:50:55 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:50:55 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:55:03 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:55:03 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:55:07 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:55:07 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:57:06 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:57:06 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:57:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:57:09 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:57:13 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:57:13 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:57:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:57:44 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:57:47 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:57:47 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:57:50 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:57:50 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:57:57 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:57:57 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:57:57 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:57:57 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:02 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:02 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:29 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:29 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:31 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:31 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:32 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:32 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:34 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:34 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:43 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:43 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:45 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:45 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:45 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:45 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 20:59:50 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 20:59:50 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:07:03 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:07:03 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:07:13 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:07:13 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:07:18 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:07:18 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:07:20 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:07:20 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:07:24 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:07:24 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:07:27 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:07:27 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:07:27 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:07:27 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:07:33 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:07:33 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:08:28 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:08:28 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:08:35 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:08:35 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:10:38 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:10:38 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:10:52 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:10:52 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:10:58 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:10:58 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:04 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:04 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:44 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:44 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:50 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:50 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:54 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:54 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:56 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:56 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:11:58 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:11:58 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:12:30 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 27651.19ms
+2026-03-02 21:12:30 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:12:30 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:12:47 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:12:47 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:12:47 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:12:47 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:12:54 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:12:54 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:13:22 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 23656.03ms
+2026-03-02 21:13:23 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:13:23 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:20:03 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:20:03 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:20:03 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:20:03 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:20:10 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:20:10 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:20:21 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:20:21 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:20:52 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:20:52 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:20:57 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:20:57 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:21:08 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:21:08 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:21:10 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:21:10 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:21:15 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:21:15 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:21:17 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:21:17 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:21:33 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:21:33 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:21:58 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 21772.98ms
+2026-03-02 21:21:58 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:21:58 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:22:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:22:44 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:22:56 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:22:56 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:24:02 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:24:02 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:24:02 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:24:02 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:31:35 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:31:35 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:32:02 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:32:02 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 21:32:04 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 21:32:04 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:08:41 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:08:41 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:08:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:08:44 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:08:50 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:08:50 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:09:05 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:09:05 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:09:13 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:09:13 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:09:45 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:09:45 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:09:53 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:09:53 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:10:00 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:10:00 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:11:49 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:11:49 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:11:55 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:11:55 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:12:00 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:12:00 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:12:07 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:12:07 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:12:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:12:09 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:12:11 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:12:11 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:12:15 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:12:15 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:12:24 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:12:24 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:12:33 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:12:33 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:12:46 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:12:46 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:13:08 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 18548.37ms
+2026-03-02 22:13:08 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:13:08 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:14:39 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:14:39 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:17:53 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:17:53 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:18:00 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:18:00 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:18:23 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 15166.79ms
+2026-03-02 22:18:23 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:18:23 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:18:37 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:18:37 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:18:37 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:18:37 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:18:54 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:18:54 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:19:03 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:19:03 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:19:13 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:19:13 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:19:16 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:19:16 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:19:27 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:19:27 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:19:32 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:19:32 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:19:55 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 17050.96ms
+2026-03-02 22:19:55 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:19:55 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:21:41 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:21:41 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:21:41 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:21:41 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:21:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:21:44 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:21:53 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:21:53 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:22:02 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:22:02 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:22:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:22:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:22:16 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:22:16 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:22:38 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 17783.63ms
+2026-03-02 22:22:38 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:22:38 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:23:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:23:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:23:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:23:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:23:21 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:23:21 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:23:31 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:23:31 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:23:40 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:23:40 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:23:49 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:23:49 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:24:10 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 17040.73ms
+2026-03-02 22:24:10 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:24:10 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:39:53 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:39:53 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:40:03 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:40:03 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:40:10 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:40:10 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:40:19 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:40:19 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:40:27 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:40:27 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:40:30 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:40:30 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:40:51 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 17646.54ms
+2026-03-02 22:40:51 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:40:51 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:42:54 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:42:54 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:43:32 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:43:32 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:43:39 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:43:39 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:43:49 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:43:49 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:43:51 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:43:51 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:43:56 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:43:56 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:44:10 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:44:10 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:44:13 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:44:13 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:44:20 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:44:20 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:44:30 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:44:30 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:44:58 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 24404.87ms
+2026-03-02 22:44:58 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:44:58 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:47:05 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:47:05 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:47:05 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:47:05 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:47:35 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:47:35 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:47:42 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:47:42 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:47:50 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:47:50 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:48:06 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:48:06 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:48:27 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:48:27 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:48:46 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:48:46 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:48:54 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:48:54 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:48:58 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:48:58 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:49:01 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:49:01 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:49:05 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:49:05 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:49:20 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:49:20 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:49:25 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:49:25 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:49:28 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:49:28 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:50:27 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:50:27 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:50:43 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:50:43 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:50:47 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:50:47 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:50:55 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:50:55 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:51:02 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:51:02 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:51:06 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:51:06 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:51:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:51:09 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:51:12 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:51:12 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:51:19 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:51:19 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:51:24 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:51:24 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:51:50 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 22614.17ms
+2026-03-02 22:51:51 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:51:51 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:54:40 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:54:40 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:54:40 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:54:40 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:54:42 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:54:42 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:54:49 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:54:49 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:55:01 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:55:01 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:55:03 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:55:03 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:55:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:55:09 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:55:23 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:55:23 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:55:48 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:55:48 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started
+2026-03-02 22:56:14 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 22008.10ms
+2026-03-02 22:56:14 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data/logs/diagnostic_platform_20260302.log
+2026-03-02 22:56:14 | src.utils.logger_setup | INFO     | <module>:712 | Enhanced application started

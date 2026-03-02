@@ -1,196 +1,224 @@
-# # src/tools/classifier_tool.py
-# import joblib
-# import os
-# from langchain.tools import tool
-
-# # Define the path to the model
-# MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "models", "dtc_classifier.pkl")
-
-# # --- SET THRESHOLD HERE ---
-# CONFIDENCE_THRESHOLD = 0.70  # 70%
-# # -------------------------
-
-# try:
-#     if os.path.exists(MODEL_PATH):
-#         MODEL = joblib.load(MODEL_PATH)
-#         MODEL_LOADED = True
-#     else:
-#         MODEL_LOADED = False
-# except Exception as e:
-#     MODEL_LOADED = False
-
-# @tool
-# def predict_root_cause(query: str) -> str:
-#     """
-#     Predicts the likely root cause using an ML model. 
-#     Returns the cause if confidence is above 70%.
-#     """
-#     if not MODEL_LOADED:
-#         return "Error: Classification model not loaded."
-    
-#     try:
-#         # Get probabilities for all classes
-#         probs_all = MODEL.predict_proba([query])[0]
-#         max_prob = probs_all.max()
-#         prediction = MODEL.predict([query])[0]
-        
-#         # Check against threshold
-#         if max_prob < CONFIDENCE_THRESHOLD:
-#             return (f"The ML model is UNCERTAIN (Confidence: {max_prob:.2%}). "
-#                     f"Predicted guess was '{prediction}', but this is below the 70% safety threshold. "
-#                     "Please ignore this guess and verify using Web Search or Service Manuals.")
-        
-#         return f"Predicted Root Cause: {prediction} (Confidence: {max_prob:.2%})"
-            
-#     except Exception as e:
-#         return f"Prediction Error: {str(e)}"
-
-
-# # src/tools/classifier_tool.py
-# import joblib
-# import os
-# import xgboost as xgb
-# from langchain.tools import tool
-
-# # Paths
-# MODEL_PATH = "models/dtc_classifier_xgb.json"
-# ENCODER_PATH = "models/label_encoder.pkl"
-# TFIDF_PATH = "models/tfidf_vectorizer.pkl"
-# CONFIDENCE_THRESHOLD = 0.70
-
-# try:
-#     # Load XGBoost and helper objects
-#     MODEL = xgb.XGBClassifier()
-#     MODEL.load_model(MODEL_PATH)
-#     LE = joblib.load(ENCODER_PATH)
-#     TFIDF = joblib.load(TFIDF_PATH)
-#     MODEL_LOADED = True
-# except Exception as e:
-#     MODEL_LOADED = False
-#     print(f"⚠️ Error loading XGBoost: {e}")
-
-# @tool
-# def predict_root_cause(query: str) -> str:
-#     """Predicts the root cause using an optimized XGBoost model."""
-#     if not MODEL_LOADED:
-#         return "Error: XGBoost model not loaded."
-    
-#     try:
-#         # 1. Vectorize text
-#         query_vec = TFIDF.transform([query])
-        
-#         # 2. Get Prediction
-#         probs = MODEL.predict_proba(query_vec)[0]
-#         max_prob = probs.max()
-#         pred_idx = probs.argmax()
-        
-#         # 3. Decode Label
-#         prediction = LE.inverse_transform([pred_idx])[0]
-        
-#         if max_prob < CONFIDENCE_THRESHOLD:
-#             return (f"XGBoost is UNCERTAIN (Confidence: {max_prob:.2%}). "
-#                     f"Possible guess: '{prediction}'. Please verify with Web Search.")
-        
-#         return f"Predicted Root Cause: {prediction} (Confidence: {max_prob:.2%})"
-            
-#     except Exception as e:
-#         return f"XGBoost Error: {str(e)}"
-
-
 import joblib
 import numpy as np
 import json
+import re as _re
 from langchain.tools import tool
+
+# --- Car model keyword map ---
+_MODEL_MAP = {
+    "nexon": "Tata Nexon", "harrier": "Tata Harrier", "safari": "Tata Safari",
+    "altroz": "Tata Altroz", "punch": "Tata Punch", "swift": "Maruti Swift",
+    "vitara": "Maruti Suzuki Vitara Brezza", "brezza": "Maruti Suzuki Vitara Brezza",
+    "baleno": "Maruti Baleno", "creta": "Hyundai Creta", "i20": "Hyundai i20",
+    "venue": "Hyundai Venue", "xuv700": "Mahindra XUV700", "xuv500": "Mahindra XUV500",
+    "scorpio": "Mahindra Scorpio", "civic": "Honda Civic", "city": "Honda City",
+    "fortuner": "Toyota Fortuner", "innova": "Toyota Innova",
+    "f-150": "Ford F-150", "ecosport": "Ford EcoSport", "ecoboost": "Ford EcoSport",
+    "xuv": "Mahindra XUV500", "kwid": "Renault Kwid", "duster": "Renault Duster",
+}
 
 class VehicleClassifier:
     def __init__(self):
-        # Ensure paths are correct relative to where you run the script
         self.model = joblib.load('models/dtc_classifier.pkl')
         self.model_enc = joblib.load('models/car_model_encoder.pkl')
         self.label_enc = joblib.load('models/target_label_encoder.pkl')
 
     def predict(self, sensor_data: dict):
         """
-        sensor_data keys: CAR_MODEL, YEAR, ENGINE_RPM, VEHICLE_SPEED, 
-        ENGINE_LOAD, COOLANT_TEMP, MAF_GRAMS_SEC, SHORT_TERM_TRIM, 
+        sensor_data keys: CAR_MODEL, YEAR, ENGINE_RPM, VEHICLE_SPEED,
+        ENGINE_LOAD, COOLANT_TEMP, MAF_GRAMS_SEC, SHORT_TERM_TRIM,
         LONG_TERM_TRIM, THROTTLE_POS
         """
-        # Convert model name to encoded value
         try:
-            model_val = self.model_enc.transform([sensor_data.get('CAR_MODEL', 'Unknown')])[0]
+            model_val = self.model_enc.transform([sensor_data.get('CAR_MODEL', 'Tata Nexon')])[0]
         except ValueError:
-            # Handle unknown models by defaulting to a known one or -1
-            # Using -1 might crash XGBoost if not trained on it, so let's use 0 (safe fallback)
-            model_val = 0 
-            
+            model_val = 0
+
         features = [
-            model_val, 
+            model_val,
             float(sensor_data.get('YEAR', 2020)),
-            float(sensor_data.get('ENGINE_RPM', 0)),
-            float(sensor_data.get('VEHICLE_SPEED', 0)),
-            float(sensor_data.get('ENGINE_LOAD', 0)),
-            float(sensor_data.get('COOLANT_TEMP', 90)),
+            float(sensor_data.get('ENGINE_RPM', 1500)),
+            float(sensor_data.get('VEHICLE_SPEED', 30)),
+            float(sensor_data.get('ENGINE_LOAD', 35)),
+            float(sensor_data.get('COOLANT_TEMP', 88)),
             float(sensor_data.get('MAF_GRAMS_SEC', 10)),
             float(sensor_data.get('SHORT_TERM_TRIM', 0)),
             float(sensor_data.get('LONG_TERM_TRIM', 0)),
             float(sensor_data.get('THROTTLE_POS', 20))
         ]
-        
-        # Get Probabilities
+
         probs = self.model.predict_proba([features])[0]
         max_prob = np.max(probs)
         prediction_idx = np.argmax(probs)
         dtc_code = self.label_enc.inverse_transform([prediction_idx])[0]
 
-        result = {
+        # Also return top-3 predictions for richer context
+        top3_idx = np.argsort(probs)[-3:][::-1]
+        top3 = [
+            {"dtc": self.label_enc.inverse_transform([i])[0], "prob": round(float(probs[i]), 3)}
+            for i in top3_idx
+        ]
+
+        return {
             "status": "CONFIDENT" if max_prob >= 0.70 else "UNCERTAIN",
-            "confidence": round(float(max_prob), 4), # Float for JSON serialization
+            "confidence": round(float(max_prob), 4),
             "prediction": dtc_code,
+            "top3_predictions": top3,
             "action": "Immediate diagnosis identified." if max_prob >= 0.70 else "Triggering deeper RAG and Web Research."
         }
-        return result
 
-# --- UPDATED TOOL DEFINITION ---
+
+def _parse_sensor_data(query: str) -> tuple:
+    """
+    Robustly parses sensor values from the agent's natural language query.
+    Returns (sensor_data dict, count of fields extracted from query).
+    """
+    sensor_data = {
+        "CAR_MODEL": None, "YEAR": 2020,
+        "ENGINE_RPM": None, "VEHICLE_SPEED": None, "ENGINE_LOAD": None,
+        "COOLANT_TEMP": None, "MAF_GRAMS_SEC": 10,
+        "SHORT_TERM_TRIM": None, "LONG_TERM_TRIM": None, "THROTTLE_POS": None
+    }
+    extracted = 0
+    lower_q = query.lower()
+
+    # --- 1. Try JSON parse first (agent may pass structured JSON) ---
+    try:
+        stripped = query.strip()
+        if stripped.startswith("{"):
+            parsed = json.loads(stripped)
+            mapping = {
+                "rpm": "ENGINE_RPM", "ENGINE_RPM": "ENGINE_RPM",
+                "speed": "VEHICLE_SPEED", "VEHICLE_SPEED": "VEHICLE_SPEED",
+                "load": "ENGINE_LOAD", "ENGINE_LOAD": "ENGINE_LOAD",
+                "temp": "COOLANT_TEMP", "COOLANT_TEMP": "COOLANT_TEMP",
+                "model": "CAR_MODEL", "CAR_MODEL": "CAR_MODEL", "year": "YEAR",
+                "short_term_trim": "SHORT_TERM_TRIM", "long_term_trim": "LONG_TERM_TRIM",
+                "throttle": "THROTTLE_POS",
+            }
+            for k, v in parsed.items():
+                key = mapping.get(k)
+                if key:
+                    sensor_data[key] = v
+                    extracted += 1
+            # Skip regex if we got JSON
+            if extracted >= 3:
+                _fill_defaults(sensor_data)
+                return sensor_data, extracted
+    except Exception:
+        pass
+
+    # --- 2. Car model keyword match ---
+    for keyword, model_name in _MODEL_MAP.items():
+        if keyword in lower_q:
+            sensor_data["CAR_MODEL"] = model_name
+            extracted += 1
+            break
+
+    # --- 3. Year (2000–2025) ---
+    year_m = _re.search(r'\b(20[0-2][0-9])\b', query)
+    if year_m:
+        sensor_data["YEAR"] = int(year_m.group(1))
+
+    # --- 4. RPM ---
+    rpm_m = _re.search(r'rpm[=:\s]+([0-9]+)|([0-9]+)\s*rpm', lower_q)
+    if rpm_m and sensor_data["ENGINE_RPM"] is None:
+        sensor_data["ENGINE_RPM"] = float(rpm_m.group(1) or rpm_m.group(2))
+        extracted += 1
+
+    # --- 5. Speed ---
+    spd_m = _re.search(r'speed[=:\s]+([0-9]+)|([0-9]+)\s*km(?:/h)?', lower_q)
+    if spd_m and sensor_data["VEHICLE_SPEED"] is None:
+        sensor_data["VEHICLE_SPEED"] = float(spd_m.group(1) or spd_m.group(2))
+        extracted += 1
+
+    # --- 6. Engine Load ---
+    load_m = _re.search(r'load[=:\s]+([0-9]+)|([0-9]+)\s*%\s*load|engine\s+load[=:\s]+([0-9]+)', lower_q)
+    if load_m and sensor_data["ENGINE_LOAD"] is None:
+        val = load_m.group(1) or load_m.group(2) or load_m.group(3)
+        if val:
+            sensor_data["ENGINE_LOAD"] = float(val)
+            extracted += 1
+
+    # --- 7. Temperature ---
+    tmp_m = _re.search(r'temp[=:\s]+([0-9]+)|coolant[=:\s]+([0-9]+)|([0-9]{2,3})\s*[°]?c\b', lower_q)
+    if tmp_m and sensor_data["COOLANT_TEMP"] is None:
+        val = tmp_m.group(1) or tmp_m.group(2) or tmp_m.group(3)
+        if val:
+            sensor_data["COOLANT_TEMP"] = float(val)
+            extracted += 1
+
+    # --- 8. Short-term fuel trim ---
+    st_m = _re.search(r'short[\s_-]*term[\s_-]*(?:fuel[\s_-]*)?trim[s]?[=:\s]+(-?[0-9.]+)', lower_q)
+    if st_m and sensor_data["SHORT_TERM_TRIM"] is None:
+        sensor_data["SHORT_TERM_TRIM"] = float(st_m.group(1))
+        extracted += 1
+
+    # --- 9. Long-term fuel trim ---
+    lt_m = _re.search(r'long[\s_-]*term[\s_-]*(?:fuel[\s_-]*)?trim[s]?[=:\s]+(-?[0-9.]+)', lower_q)
+    if lt_m and sensor_data["LONG_TERM_TRIM"] is None:
+        sensor_data["LONG_TERM_TRIM"] = float(lt_m.group(1))
+        extracted += 1
+
+    # --- 10. Throttle position ---
+    thr_m = _re.search(r'throttle[=:\s]+([0-9]+)', lower_q)
+    if thr_m and sensor_data["THROTTLE_POS"] is None:
+        sensor_data["THROTTLE_POS"] = float(thr_m.group(1))
+        extracted += 1
+
+    _fill_defaults(sensor_data)
+    return sensor_data, extracted
+
+
+def _fill_defaults(sensor_data: dict):
+    """Fill any remaining None values with safe neutral defaults."""
+    defaults = {
+        "CAR_MODEL": "Tata Nexon", "ENGINE_RPM": 1500, "VEHICLE_SPEED": 30,
+        "ENGINE_LOAD": 35, "COOLANT_TEMP": 88, "SHORT_TERM_TRIM": 0,
+        "LONG_TERM_TRIM": 0, "THROTTLE_POS": 20
+    }
+    for key, dval in defaults.items():
+        if sensor_data.get(key) is None:
+            sensor_data[key] = dval
+
+
+# --- TOOL DEFINITION ---
 @tool
 def predict_root_cause(query: str):
     """
-    Predicts the vehicle's Diagnostic Trouble Code (DTC) using an XGBoost Machine Learning model.
-    Input should be a JSON string or description of sensor values (RPM, Load, Speed, etc.).
-    Returns a JSON string with confidence score and predicted DTC.
+    Predicts the vehicle's most likely fault DTC code using a Random Forest ML model trained on OBD-II sensor data.
+    Include RPM, Speed, Load%, Temp°C, and vehicle model in your query for best accuracy.
+    Returns JSON with confidence score, predicted DTC, top-3 predictions, and ml_score_hint.
+
+    CRITICAL: Always use the 'ml_score_hint' integer (0-100) directly as the ml_score in your final response JSON.
+    If data_quality is 'LOW', reduce the ml_score by 15 points to reflect uncertainty from missing sensor data.
     """
     try:
-        # 1. Parse Input (Simple parsing logic for demo)
-        # In a real app, the Agent would pass a JSON string. 
-        # Here we default to some dummy values if parsing fails, 
-        # or we try to extract from the query string.
-        
-        # For this prototype, we'll assume the Agent passes the query string 
-        # and we extract what we can, or use the 'query' as a key if it's a dict-like string.
-        # But for robust 'evaluate.py' usage where input is natural language:
-        
-        # We will initialize with safe defaults
-        sensor_data = {
-            "CAR_MODEL": "Tata Nexon", "YEAR": 2020, 
-            "ENGINE_RPM": 2000, "VEHICLE_SPEED": 50, "ENGINE_LOAD": 40,
-            "COOLANT_TEMP": 90, "MAF_GRAMS_SEC": 15, 
-            "SHORT_TERM_TRIM": 0, "LONG_TERM_TRIM": 0, "THROTTLE_POS": 25
-        }
-        
-        # Simple keyword extraction to make the CLI chat feel real
-        lower_q = query.lower()
-        if "nexon" in lower_q: sensor_data["CAR_MODEL"] = "Tata Nexon"
-        if "f-150" in lower_q: sensor_data["CAR_MODEL"] = "Ford F-150"
-        if "rpm" in lower_q: 
-            # Try to find a number near 'rpm'
-            import re
-            nums = re.findall(r'\d+', lower_q)
-            if nums: sensor_data["ENGINE_RPM"] = float(nums[0])
+        sensor_data, fields_extracted = _parse_sensor_data(query)
 
         classifier = VehicleClassifier()
         result = classifier.predict(sensor_data)
-        
-        # CRITICAL FIX: Return JSON String
+
+        # Metadata for grounding the LLM's score assignment
+        result["fields_extracted"] = fields_extracted
+        result["data_quality"] = (
+            "HIGH" if fields_extracted >= 5 else
+            "MEDIUM" if fields_extracted >= 3 else
+            "LOW — sensor defaults used, reduce ml_score by 15 points"
+        )
+        result["parsed_sensors"] = {
+            "model": sensor_data["CAR_MODEL"],
+            "rpm": sensor_data["ENGINE_RPM"],
+            "speed": sensor_data["VEHICLE_SPEED"],
+            "load_pct": sensor_data["ENGINE_LOAD"],
+            "temp_c": sensor_data["COOLANT_TEMP"],
+        }
+        # Direct instruction to the LLM: use this number
+        base_score = round(result["confidence"] * 100)
+        penalty = 15 if fields_extracted < 3 else (5 if fields_extracted < 5 else 0)
+        result["ml_score_hint"] = max(0, base_score - penalty)
+
         return json.dumps(result)
-        
+
     except Exception as e:
-        return json.dumps({"error": str(e)})
+        return json.dumps({"error": str(e), "ml_score_hint": 0})

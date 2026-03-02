@@ -669,6 +669,15 @@ import streamlit as st
 import time
 import os
 import sys
+
+# Fix gRPC DNS + SSL issues on macOS Python 3.13
+# c-ares DNS resolver fails on macOS; use native resolver instead
+# Also set SSL cert paths for gRPC
+import certifi
+os.environ.setdefault('GRPC_DNS_RESOLVER', 'native')
+os.environ.setdefault('SSL_CERT_FILE', certifi.where())
+os.environ.setdefault('GRPC_DEFAULT_SSL_ROOTS_FILE_PATH', certifi.where())
+
 import json
 import base64
 import re
@@ -701,7 +710,7 @@ try:
     from src.agents.advisor import langgraph_app, parser
     logger = setup_logging()
     logger.info("Enhanced application started")
-except ImportError as e:
+except Exception as e:
     st.error(f"Critical Import Error: {e}")
     logger = None
 
@@ -881,7 +890,11 @@ for key, val in defaults.items():
     if key not in st.session_state: st.session_state[key] = val
 
 # Initialize LLM
-llm_flash = ChatGoogleGenerativeAI(model=CONFIG.model_name, temperature=CONFIG.temperature)
+llm_flash = ChatGoogleGenerativeAI(
+    model=CONFIG.model_name,
+    temperature=CONFIG.temperature,
+    google_api_key=os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"),
+)
 
 # ==========================================
 # ENHANCED: UTILITY FUNCTIONS
@@ -1155,12 +1168,15 @@ for idx, msg in enumerate(st.session_state.messages):
             d = msg["data"]
             st.subheader(f"{d['main_heading']}", divider="blue")
             
-            safe_conf = str(d.get('confidence_level', '90')).replace('%', '').strip()
+            safe_conf = d.get('confidence_score', d.get('confidence_level', 'N/A'))
+            rag_score = d.get('rag_score', 'N/A')
+            ml_score = d.get('ml_score', 'N/A')
+            conf_display = f"{safe_conf}%" if isinstance(safe_conf, int) else str(safe_conf)
             
             c1, c2, c3 = st.columns(3)
-            with c1: st.markdown(f"<div class='confidence-card'><span class='card-label'>RAG Knowledge</span><span class='card-score'>{d.get('rag_score', 92)}%</span></div>", unsafe_allow_html=True)
-            with c2: st.markdown(f"<div class='confidence-card'><span class='card-label'>ML Predictive</span><span class='card-score'>{d.get('ml_score', 88)}%</span></div>", unsafe_allow_html=True)
-            with c3: st.markdown(f"<div class='confidence-card'><span class='card-label'>Overall</span><span class='card-score'>{safe_conf}%</span></div>", unsafe_allow_html=True)
+            with c1: st.markdown(f"<div class='confidence-card'><span class='card-label'>RAG Knowledge</span><span class='card-score'>{rag_score}{'%' if isinstance(rag_score, int) else ''}</span></div>", unsafe_allow_html=True)
+            with c2: st.markdown(f"<div class='confidence-card'><span class='card-label'>ML Predictive</span><span class='card-score'>{ml_score}{'%' if isinstance(ml_score, int) else ''}</span></div>", unsafe_allow_html=True)
+            with c3: st.markdown(f"<div class='confidence-card'><span class='card-label'>Overall</span><span class='card-score'>{conf_display}</span></div>", unsafe_allow_html=True)
             
             st.markdown(f"**Final Verdict:** {d['diagnosis']}")
             with st.expander("View Technical Evidence"):
@@ -1209,26 +1225,49 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 
             t_parser = PydanticOutputParser(pydantic_object=Triage)
             
-            history_context = "No previous diagnosis."
+            # Build rich history context from all recent messages
+            history_context = "No previous interaction."
             if st.session_state.messages:
-                last_msg = st.session_state.messages[-1]
-                if last_msg["role"] == "assistant" and last_msg["type"] == "structured":
-                    history_context = f"Previous Diagnosis: {last_msg['data'].get('diagnosis')}\nSteps: {last_msg['data'].get('action_plan')}"
-            
+                recent = st.session_state.messages[-6:]  # last 3 exchanges
+                history_parts = []
+                for m in recent:
+                    role = m["role"].upper()
+                    if m["type"] == "text":
+                        history_parts.append(f"{role}: {m['content'][:300]}")
+                    elif m["type"] in ("structured", "conversational_diagnostic"):
+                        d = m.get("data", {})
+                        history_parts.append(f"{role}: [DIAGNOSIS] {d.get('diagnosis', '')[:200]}")
+                if history_parts:
+                    history_context = "\n".join(history_parts)
+
+            # Count how many clarifying question rounds have already happened
+            clarify_count = sum(
+                1 for m in st.session_state.messages
+                if m["role"] == "assistant" and m["type"] == "text"
+                and ("could you" in m["content"].lower() or "please" in m["content"].lower() or "can you" in m["content"].lower())
+            )
+            already_asked = clarify_count >= 1
+
             t_prompt = (
-                f"Context from previous turn:\n{history_context}\n\n"
-                f"User Input: '{user_text}' | Vehicle: {st.session_state.car_model_val} | DTC: {st.session_state.dtc_val} | "
-                f"Sensors: RPM={st.session_state.rpm_val}, Speed={st.session_state.speed_val}, Load={st.session_state.load_val}%, Temp={st.session_state.temp_val}C\n"
-                "CRITICAL RULES:\n"
-                "1. If user describes a NEW issue, set is_diagnostic=True and is_follow_up=False.\n"
-                "2. If user asks a FOLLOW-UP question, set is_diagnostic=False, is_follow_up=True, and write the answer in 'response'.\n"
-                "3. If general chat, set is_diagnostic=False and reply in 'response'.\n"
-                "4. If is_diagnostic=True BUT the input is vague and lacks technical details, set is_sufficient=False. In 'response', act as a helpful mechanic and ask a specific CLARIFYING QUESTION.\n"
+                f"Conversation so far:\n{history_context}\n\n"
+                f"NEW User Input: '{user_text}'\n"
+                f"Sidebar Data → Vehicle: {st.session_state.car_model_val} | DTC: {st.session_state.dtc_val} | "
+                f"Sensors: RPM={st.session_state.rpm_val}, Speed={st.session_state.speed_val}, Load={st.session_state.load_val}%, Temp={st.session_state.temp_val}C\n\n"
+                "CRITICAL RULES (follow in order):\n"
+                "1. If the user is asking a FOLLOW-UP question about a previous diagnosis (tools, cost, explanation), set is_diagnostic=False, is_follow_up=True. Answer in 'response'.\n"
+                "2. If the user describes a NEW vehicle fault or symptom → is_diagnostic=True.\n"
+                f"3. IMPORTANT: A clarifying question has {'ALREADY BEEN ASKED' if already_asked else 'NOT yet been asked'}. "
+                f"{'You MUST set is_sufficient=True and proceed with a diagnosis now using whatever info is available. DO NOT ask another question.' if already_asked else 'If critical data (vehicle model AND symptom) is missing AND no DTC is given, you may ask ONE clarifying question by setting is_sufficient=False.'}\n"
+                "4. If a DTC code is present, OR sensor readings are present, OR a vehicle model + symptom is given → set is_sufficient=True.\n"
                 f"{t_parser.get_format_instructions()}"
             )
             
             t_res = llm_flash.invoke(t_prompt)
             intent = t_parser.parse(t_res.content.replace('```json','').replace('```','').strip())
+
+            # Force diagnosis if user already answered a clarifying question
+            if already_asked and intent.is_diagnostic:
+                intent.is_sufficient = True
 
             if not intent.is_diagnostic or not intent.is_sufficient:
                 st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
@@ -1287,10 +1326,11 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
             # ---------------------------------------------------------
             # TERMINAL SHOWCASE: DIAGNOSTIC RESULTS
             # ---------------------------------------------------------
-            safe_conf_term = str(validated.confidence_level).replace('%', '').strip()
             print(f"\n{'-'*70}")
             print(f"✅ WORKFLOW COMPLETE ({duration_ms:.0f}ms)")
-            print(f"   Confidence Score : {safe_conf_term}%")
+            print(f"   Confidence Level : {validated.confidence_level} ({validated.confidence_score}%)")
+            print(f"   RAG Score        : {validated.rag_score}%")
+            print(f"   ML Score         : {validated.ml_score}%")
             print(f"{'-'*70}")
             print(f"DIAGNOSIS:\n{validated.diagnosis}\n")
             print(f"ACTION PLAN:")
@@ -1308,6 +1348,9 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 "action_plan": validated.action_plan,
                 "safety_warning": validated.safety_warning,
                 "confidence_level": validated.confidence_level,
+                "confidence_score": validated.confidence_score,
+                "rag_score": validated.rag_score,
+                "ml_score": validated.ml_score,
                 "vehicle_model": st.session_state.car_model_val,
                 "dtc_codes": st.session_state.dtc_val,
                 "symptoms": st.session_state.symptom_val,
@@ -1338,7 +1381,7 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
             st.error(handle_streamlit_error(e, "Validation Error"))
         except Exception as e:
             st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
-            st.session_state.messages.append({"role": "assistant", "content": raw_output, "type": "text"})
+            st.session_state.messages.append({"role": "assistant", "content": f"⚠️ Error: {str(e)}", "type": "text"})
             st.rerun()
 
 # ==========================================

@@ -109,8 +109,15 @@
 
 import os
 import json
+
+# Fix gRPC DNS + SSL issues on macOS Python 3.13
+import certifi
+os.environ.setdefault('GRPC_DNS_RESOLVER', 'native')
+os.environ.setdefault('SSL_CERT_FILE', certifi.where())
+os.environ.setdefault('GRPC_DEFAULT_SSL_ROOTS_FILE_PATH', certifi.where())
 from dotenv import load_dotenv
 from typing import List, Dict, Any, Annotated
+from typing_extensions import TypedDict
 from pydantic import BaseModel, Field
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -153,7 +160,10 @@ class DiagnosticResponse(BaseModel):
     needs_more_info: bool
     clarifying_questions: List[str]
     diagnosis: str
-    confidence_level: str
+    confidence_level: str = Field(description="Overall confidence as a label: High, Medium, or Low.")
+    confidence_score: int = Field(description="Overall confidence as an integer percentage 0-100, e.g. 87.")
+    rag_score: int = Field(description="Integer 0-100 reflecting how well the RAG knowledge base matched this case.")
+    ml_score: int = Field(description="Integer 0-100 reflecting the ML classifier confidence for the predicted root cause.")
     ml_evidence: str
     rag_evidence: str
     web_evidence: str
@@ -162,23 +172,40 @@ class DiagnosticResponse(BaseModel):
 
 parser = PydanticOutputParser(pydantic_object=DiagnosticResponse)
 
-class AgentState(BaseModel):
+class AgentState(TypedDict):
     messages: Annotated[List[BaseMessage], operator.add]
 
 # ==========================================
 # 3. NODES WITH ENHANCED LOGGING
 # ==========================================
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2)
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0.2,
+    google_api_key=os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"),
+)
 tools = [predict_root_cause, vehicle_diagnostic_db, vehicle_web_search]
 llm_with_tools = llm.bind_tools(tools)
 
 def diagnostic_reasoner(state: AgentState):
     TerminalLogger.header("Agent Reasoning")
     
-    agent_template = f"""You are a Master Diagnostic AI. Format response ONLY as JSON:
-    {parser.get_format_instructions()}"""
+    agent_template = f"""You are a Master Diagnostic AI for vehicle troubleshooting.
+
+STEP 1 - TOOLS: You MUST call predict_root_cause, vehicle_diagnostic_db, and vehicle_web_search before writing your final answer. Include all sensor values in your tool queries (RPM, Speed, Load%, Temp, car model).
+
+STEP 2 - SCORES: After running the tools, read the score hints they return:
+- From predict_root_cause output → read 'ml_score_hint' (integer 0-100). Use this EXACTLY as ml_score.
+  - If data_quality is 'LOW', subtract 15 from ml_score_hint.
+- From vehicle_diagnostic_db output → read 'RAG_SCORE_HINT' (integer 0-100). Use this EXACTLY as rag_score.
+  - If output says "No matching manual section found", set rag_score=5.
+- confidence_score = weighted average: (ml_score * 0.4) + (rag_score * 0.35) + (web_quality * 0.25)
+  where web_quality = 80 if web search returned multiple relevant results, 40 if partial, 10 if no results.
+- confidence_level = "High" if confidence_score >= 75, "Medium" if >= 50, "Low" otherwise.
+
+STEP 3 - FORMAT: Output ONLY this JSON object (no other text):
+{parser.get_format_instructions()}"""
     
-    messages = [SystemMessage(content=agent_template)] + state.messages
+    messages = [SystemMessage(content=agent_template)] + state['messages']
     response = llm_with_tools.invoke(messages)
     
     if response.tool_calls:
@@ -187,11 +214,11 @@ def diagnostic_reasoner(state: AgentState):
     return {"messages": [response]}
 
 def tool_logger_node(state: AgentState):
-    last_msg = state.messages[-1]
+    last_msg = state['messages'][-1]
     if isinstance(last_msg, ToolMessage):
         # Find which tool was just run
         tool_name = "Unknown Tool"
-        for msg in reversed(state.messages[:-1]):
+        for msg in reversed(state['messages'][:-1]):
             if hasattr(msg, 'tool_calls') and msg.tool_calls:
                 tool_name = msg.tool_calls[0]['name']
                 break
@@ -207,7 +234,7 @@ workflow.add_node("tools", ToolNode(tools))
 workflow.add_node("logger", tool_logger_node)
 
 workflow.add_edge(START, "reasoner")
-workflow.add_conditional_edges("reasoner", lambda x: "tools" if x.messages[-1].tool_calls else END)
+workflow.add_conditional_edges("reasoner", lambda x: "tools" if x['messages'][-1].tool_calls else END)
 workflow.add_edge("tools", "logger")
 workflow.add_edge("logger", "reasoner")
 
