@@ -659,7 +659,6 @@
 # st.markdown("<div style='text-align: center; color: #001F5B; font-weight: 900; font-size: 14px;'>Powered by Tata Technologies | Smart Vehicle Diagnostic Platform</div>", unsafe_allow_html=True)
 
 
-# Some new version 
 
 """
 Enhanced Vehicle Diagnostic Platform - v2.0
@@ -671,8 +670,6 @@ import os
 import sys
 
 # Fix gRPC DNS + SSL issues on macOS Python 3.13
-# c-ares DNS resolver fails on macOS; use native resolver instead
-# Also set SSL cert paths for gRPC
 import certifi
 os.environ.setdefault('GRPC_DNS_RESOLVER', 'native')
 os.environ.setdefault('SSL_CERT_FILE', certifi.where())
@@ -688,6 +685,9 @@ from PIL import Image
 import io
 from dotenv import load_dotenv
 import pandas as pd
+import joblib
+import numpy as np
+from sklearn.metrics import confusion_matrix, accuracy_score
 
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -715,6 +715,18 @@ except Exception as e:
     logger = None
 
 # ==========================================
+# LOAD RANDOM FOREST MODELS FOR TERMINAL LOGGING
+# ==========================================
+try:
+    rf_model = joblib.load('models/dtc_classifier.pkl')
+    target_encoder = joblib.load('models/target_label_encoder.pkl')
+    car_encoder = joblib.load('models/car_model_encoder.pkl')
+    if logger: logger.info("✅ ML Models & Encoders loaded successfully.")
+except Exception as e:
+    if logger: logger.warning(f"⚠️ Could not load ML models: {e}")
+    rf_model, target_encoder, car_encoder = None, None, None
+
+# ==========================================
 # ENHANCED: UI CONFIG & ENTERPRISE THEME
 # ==========================================
 st.set_page_config(
@@ -737,8 +749,12 @@ st.markdown("""
 
     /* AGGRESSIVE INPUT BOX OVERRIDES */
     div[data-baseweb="input"] > div, 
-    div[data-baseweb="textarea"], 
     div[data-baseweb="select"] > div {
+        background-color: #FFFFFF !important;
+        border: 1px solid #A5C8ED !important;
+        border-radius: 6px !important;
+    }
+    :not([data-testid="stChatInput"]) > div[data-baseweb="textarea"] {
         background-color: #FFFFFF !important;
         border: 1px solid #A5C8ED !important;
         border-radius: 6px !important;
@@ -758,17 +774,37 @@ st.markdown("""
         opacity: 1 !important;
     }
     
+    /* Chat Input */
     [data-testid="stChatInput"] {
         background-color: #F8FCFF !important;
-        border: 1px solid #A5C8ED !important;
-        border-radius: 12px !important;
-        padding: 6px 15px !important;
-        box-shadow: 0 4px 12px rgba(0, 82, 204, 0.05) !important;
+        border: 1.5px solid #A5C8ED !important;
+        border-radius: 16px !important;
+        padding: 4px 10px !important;
+        box-shadow: 0 2px 8px rgba(0, 82, 204, 0.06) !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+    [data-testid="stChatInput"]:focus-within {
+        border-color: #0052CC !important;
+        box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1) !important;
+    }
+    [data-testid="stChatInput"] *,
+    [data-testid="stChatInput"] div,
+    [data-testid="stChatInput"] div[data-baseweb="textarea"],
+    [data-testid="stChatInput"] div[data-baseweb="base-input"],
+    [data-testid="stChatInput"] div[data-baseweb="input"] {
+        background-color: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        outline: none !important;
     }
     [data-testid="stChatInput"] textarea {
         background-color: transparent !important;
         color: #001F5B !important;
         font-weight: 500 !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
     }
     
     [data-testid="stFileUploader"] {
@@ -881,6 +917,10 @@ if 'processed_images' not in st.session_state: st.session_state.processed_images
 if 'session_id' not in st.session_state: st.session_state.session_id = str(datetime.now().timestamp())
 if 'vision_calls' not in st.session_state: st.session_state.vision_calls = 0
 if 'agent_latency_ms' not in st.session_state: st.session_state.agent_latency_ms = 0
+
+# TRACKING ARRAYS FOR CONFUSION MATRIX
+if 'cm_actual_labels' not in st.session_state: st.session_state.cm_actual_labels = []
+if 'cm_predicted_labels' not in st.session_state: st.session_state.cm_predicted_labels = []
 
 defaults = {
     'rpm_val': 0, 'speed_val': 0, 'load_val': 0, 'temp_val': 0, 
@@ -1091,14 +1131,13 @@ with st.sidebar:
         - Shows RPM, Speed, Load, Temp, and DTC values
         """)
 
-    with st.container(border=True):
-        st.markdown("**Manual Context**")
-        st.session_state.car_model_val = st.text_input(
-            "Vehicle Model", value=st.session_state.car_model_val, placeholder="e.g., Tata Safari"
-        )
-        st.session_state.dtc_val = st.text_input("Active Fault Codes (DTC)", value=st.session_state.dtc_val)
-        st.session_state.symptom_val = st.text_area("Symptom Description", value=st.session_state.symptom_val, height=60)
-        st.session_state.condition_val = st.text_input("Operating Condition", value=st.session_state.condition_val)
+    st.markdown("**Manual Context**")
+    st.session_state.car_model_val = st.text_input(
+        "Vehicle Model", value=st.session_state.car_model_val, placeholder="e.g., Tata Safari"
+    )
+    st.session_state.dtc_val = st.text_input("Active Fault Codes (DTC)", value=st.session_state.dtc_val)
+    st.session_state.symptom_val = st.text_area("Symptom Description", value=st.session_state.symptom_val, height=60)
+    st.session_state.condition_val = st.text_input("Operating Condition", value=st.session_state.condition_val)
 
     with st.expander("Live Sensor Data", expanded=True):
         col_s1, col_s2 = st.columns(2)
@@ -1114,6 +1153,8 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.processed_images = set()
         st.session_state.vision_calls = 0
+        st.session_state.cm_actual_labels = []
+        st.session_state.cm_predicted_labels = []
         st.rerun()
 
 # ==========================================
@@ -1225,10 +1266,9 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 
             t_parser = PydanticOutputParser(pydantic_object=Triage)
             
-            # Build rich history context from all recent messages
             history_context = "No previous interaction."
             if st.session_state.messages:
-                recent = st.session_state.messages[-6:]  # last 3 exchanges
+                recent = st.session_state.messages[-6:] 
                 history_parts = []
                 for m in recent:
                     role = m["role"].upper()
@@ -1240,7 +1280,6 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 if history_parts:
                     history_context = "\n".join(history_parts)
 
-            # Count how many clarifying question rounds have already happened
             clarify_count = sum(
                 1 for m in st.session_state.messages
                 if m["role"] == "assistant" and m["type"] == "text"
@@ -1265,7 +1304,6 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
             t_res = llm_flash.invoke(t_prompt)
             intent = t_parser.parse(t_res.content.replace('```json','').replace('```','').strip())
 
-            # Force diagnosis if user already answered a clarifying question
             if already_asked and intent.is_diagnostic:
                 intent.is_sufficient = True
 
@@ -1284,7 +1322,103 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
             flow_container = st.empty()
             current_path = "Live Path: START"
             flow_container.markdown(current_path)
-            
+
+            # ---------------------------------------------------------
+            # TERMINAL SHOWCASE: ML CONFUSION MATRIX LOGGING
+            # ---------------------------------------------------------
+            ml_confidence = None
+            if rf_model is not None and target_encoder is not None:
+                try:
+                    # 1. Base numeric features
+                    base_features = [
+                        st.session_state.rpm_val, 
+                        st.session_state.speed_val, 
+                        st.session_state.load_val, 
+                        st.session_state.temp_val
+                    ]
+                    
+                    # 2. Encode the Car Model
+                    car_features = []
+                    if car_encoder is not None:
+                        try:
+                            # Handle both LabelEncoders and OneHotEncoders safely
+                            car_trans = car_encoder.transform([[st.session_state.car_model_val]])
+                            if hasattr(car_trans, "toarray"):
+                                car_features = car_trans.toarray()[0].tolist()
+                            elif isinstance(car_trans, np.ndarray):
+                                car_features = car_trans.flatten().tolist()
+                            else:
+                                car_features = list(car_trans)
+                        except Exception:
+                            # If the user types a new car model not in training data, ignore encoding
+                            pass
+                    
+                    # 3. Combine them
+                    ml_features = base_features + car_features
+                    
+                    # 4. SAFETY NET: Force exactly 10 features to prevent Scikit-learn crashes
+                    if len(ml_features) < 10:
+                        ml_features += [0] * (10 - len(ml_features))
+                    elif len(ml_features) > 10:
+                        ml_features = ml_features[:10]
+                        
+                    final_input = [ml_features]
+                    
+                    # 5. Get the model's prediction AND confidence score
+                    pred_encoded = rf_model.predict(final_input)[0]
+                    try:
+                        probabilities = rf_model.predict_proba(final_input)[0]
+                        ml_confidence = max(probabilities) * 100
+                    except AttributeError:
+                        ml_confidence = 0.0
+                    
+                    # 6. Get the "True" label from the UI input
+                    true_label_str = st.session_state.dtc_val if st.session_state.dtc_val else "UNKNOWN"
+                    try:
+                        true_encoded = target_encoder.transform([true_label_str])[0]
+                    except ValueError:
+                        true_encoded = pred_encoded # Fallback if DTC isn't recognized
+                    
+                    # 7. Track in session state to build the matrix over time
+                    st.session_state.cm_actual_labels.append(true_encoded)
+                    st.session_state.cm_predicted_labels.append(pred_encoded)
+                    
+                    # 8. Get all possible classes from the encoder DYNAMICALLY
+                    class_names = target_encoder.classes_
+                    all_labels = np.arange(len(class_names))
+                    
+                    # 9. Generate and Print the matrix
+                    cm = confusion_matrix(
+                        st.session_state.cm_actual_labels, 
+                        st.session_state.cm_predicted_labels,
+                        labels=all_labels
+                    )
+                    acc = accuracy_score(st.session_state.cm_actual_labels, st.session_state.cm_predicted_labels)
+                    
+                    print(f"\n{'='*70}")
+                    print("LIVE SESSION CONFUSION MATRIX (Random Forest)")
+                    print(f"{'='*70}")
+                    
+                    header = f"{'':>12} | " + " | ".join([f"{name:>8}" for name in class_names])
+                    print(header)
+                    print("-" * len(header))
+                    
+                    for i, row in enumerate(cm):
+                        row_str = " | ".join([f"{val:>8}" for val in row])
+                        if i < len(class_names):
+                            print(f"{class_names[i]:>12} | {row_str}")
+                        else:
+                            print(f"{i:>12} | {row_str}")
+                    
+                    # 10. Print the Confidence and Accuracy Scores
+                    print(f"{'-'*70}")
+                    print(f"🧠 LATEST PREDICTION CONFIDENCE: {ml_confidence:.2f}%")
+                    print(f"🎯 CURRENT SESSION ACCURACY: {acc * 100:.2f}%")
+                    print(f"{'='*70}\n")
+                    
+                except Exception as ml_err:
+                    print(f"⚠️ Could not generate ML matrix: {ml_err}")
+
             # ---------------------------------------------------------
             # TERMINAL SHOWCASE: WORKFLOW START
             # ---------------------------------------------------------
@@ -1338,6 +1472,11 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 print(f"  {i}. {clean_industry_text(step)}")
             print(f"{'='*70}\n")
             
+            # ---------------------------------------------------------
+            # UI SYNC: FORCE REAL ML SCORE INTO DASHBOARD
+            # ---------------------------------------------------------
+            real_ml_score = int(ml_confidence) if ml_confidence is not None else validated.ml_score
+            
             structured_data = {
                 "id": str(datetime.now().timestamp()),
                 "main_heading": intent.ui_main_heading or "Diagnostic Analysis Results",
@@ -1350,7 +1489,7 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 "confidence_level": validated.confidence_level,
                 "confidence_score": validated.confidence_score,
                 "rag_score": validated.rag_score,
-                "ml_score": validated.ml_score,
+                "ml_score": real_ml_score, 
                 "vehicle_model": st.session_state.car_model_val,
                 "dtc_codes": st.session_state.dtc_val,
                 "symptoms": st.session_state.symptom_val,
@@ -1396,3 +1535,4 @@ with st.expander("Platform Statistics"):
 
 st.markdown("---")
 st.markdown("<div style='text-align: center; color: #001F5B; font-weight: 900; font-size: 14px;'>Powered by Tata Technologies | Smart Vehicle Diagnostic Platform</div>", unsafe_allow_html=True)
+
