@@ -191,7 +191,21 @@ def diagnostic_reasoner(state: AgentState):
     
     agent_template = f"""You are a Master Diagnostic AI for vehicle troubleshooting.
 
-STEP 1 - TOOLS: You MUST call predict_root_cause, vehicle_diagnostic_db, and vehicle_web_search before writing your final answer. Include all sensor values in your tool queries (RPM, Speed, Load%, Temp, car model).
+STEP 1 - TOOLS: You MUST call predict_root_cause, vehicle_diagnostic_db, and vehicle_web_search before writing your final answer.
+
+CRITICAL — predict_root_cause query format:
+You MUST pass a JSON string with the EXACT numeric sensor values from the input. Do NOT paraphrase.
+Extract these fields from the input and build the JSON:
+  - "CAR_MODEL": vehicle model string (e.g. "Tata Nexon")
+  - "ENGINE_RPM": RPM as a number
+  - "VEHICLE_SPEED": speed in km/h as a number
+  - "ENGINE_LOAD": engine load percentage as a number
+  - "COOLANT_TEMP": temperature in Celsius as a number
+  - "DTC": the DTC code string if present (e.g. "P0171"), else omit
+
+Example: {{"CAR_MODEL": "Tata Nexon", "ENGINE_RPM": 750, "VEHICLE_SPEED": 0, "ENGINE_LOAD": 30, "COOLANT_TEMP": 90, "DTC": "P0171"}}
+
+For vehicle_diagnostic_db and vehicle_web_search, write a natural language query including the DTC code and symptoms.
 
 STEP 2 - SCORES: After running the tools, read the score hints they return:
 - From predict_root_cause output → read 'ml_score_hint' (integer 0-100). Use this EXACTLY as ml_score.

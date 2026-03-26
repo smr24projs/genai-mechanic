@@ -130,9 +130,14 @@
 
 
 
+import os
 import pandas as pd
 import numpy as np
 import joblib
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend — safe for scripts without a display
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
@@ -200,6 +205,60 @@ preds = model.predict(X_test)
 y_test_labels = label_encoder.inverse_transform(y_test)
 preds_labels = label_encoder.inverse_transform(preds)
 print(classification_report(y_test_labels, preds_labels))
+
+# --- Confusion Matrix ---
+print("\n📊 Confusion Matrix:")
+class_labels = label_encoder.classes_
+cm = confusion_matrix(y_test_labels, preds_labels, labels=class_labels)
+cm_df = pd.DataFrame(cm, index=class_labels, columns=class_labels)
+cm_df.index.name = "Actual \\ Predicted"
+print(cm_df.to_string())
+print("\n(Rows = Actual class, Columns = Predicted class)")
+
+# --- Save visual confusion matrix heatmap ---
+print("\n🖼️  Generating confusion matrix heatmap...")
+os.makedirs('models', exist_ok=True)
+
+n_classes = len(class_labels)
+# Scale figure size dynamically so labels never overlap
+fig_size = max(10, n_classes * 0.9)
+fig, ax = plt.subplots(figsize=(fig_size, fig_size * 0.85))
+
+# Normalised matrix (row-wise, so each cell = recall for that class)
+cm_norm = cm.astype(float) / cm.sum(axis=1, keepdims=True)
+
+# Draw heatmap with count annotations; colour intensity = normalised value
+sns.heatmap(
+    cm_norm,
+    annot=cm,           # show raw counts inside cells
+    fmt='d',
+    cmap='Blues',
+    linewidths=0.4,
+    linecolor='#e0e0e0',
+    xticklabels=class_labels,
+    yticklabels=class_labels,
+    ax=ax,
+    cbar_kws={'label': 'Recall (normalised)', 'shrink': 0.75},
+    annot_kws={'size': max(7, 11 - n_classes // 5)},
+)
+
+ax.set_title(
+    'Random Forest — Confusion Matrix\n(cell = count  |  colour = per-class recall)',
+    fontsize=14, fontweight='bold', pad=18
+)
+ax.set_xlabel('Predicted DTC', fontsize=12, labelpad=10)
+ax.set_ylabel('Actual DTC', fontsize=12, labelpad=10)
+
+# Rotate long x-axis labels for readability
+plt.xticks(rotation=45, ha='right', fontsize=max(7, 10 - n_classes // 8))
+plt.yticks(rotation=0, fontsize=max(7, 10 - n_classes // 8))
+
+plt.tight_layout()
+
+cm_path = 'models/confusion_matrix.png'
+plt.savefig(cm_path, dpi=150, bbox_inches='tight')
+plt.close(fig)
+print(f"✅ Confusion matrix heatmap saved → {cm_path}")
 
 print("Accuracy on test set:", model.score(X_test, y_test))
 

@@ -4,6 +4,98 @@ import json
 import re as _re
 from langchain.tools import tool
 
+
+# ============================================================
+# LIVE SESSION CONFUSION MATRIX TRACKER
+# ============================================================
+class LiveSessionTracker:
+    """Tracks actual vs predicted DTC pairs during a running session
+    and prints a formatted confusion matrix to the terminal after
+    every prediction call."""
+
+    def __init__(self):
+        self.records: list[tuple[str, str]] = []  # (actual, predicted)
+        self.last_confidence: float = 0.0
+
+    def _known_classes(self) -> list[str]:
+        """Return sorted unique union of all seen labels."""
+        seen = set()
+        for actual, pred in self.records:
+            seen.add(actual)
+            seen.add(pred)
+        return sorted(seen)
+
+    def log(self, actual_dtc: str, predicted_dtc: str, confidence: float):
+        self.records.append((actual_dtc, predicted_dtc))
+        self.last_confidence = confidence
+        self._print_matrix()
+
+    def _print_matrix(self):
+        classes = self._known_classes()
+        n = len(classes)
+        idx = {c: i for i, c in enumerate(classes)}
+
+        # Build count matrix
+        matrix = [[0] * n for _ in range(n)]
+        for actual, pred in self.records:
+            if actual in idx and pred in idx:
+                matrix[idx[actual]][idx[pred]] += 1
+
+        # --- Header
+        col_w = max(10, max(len(c) for c in classes) + 2)
+        row_w = col_w
+        sep = "=" * (row_w + (col_w + 3) * n + 1)
+        dash = "-" * len(sep)
+
+        print(f"\n{sep}")
+        print(f"  LIVE SESSION CONFUSION MATRIX (Random Forest)")
+        print(sep)
+
+        # Column headers
+        header = " " * row_w + " |"
+        for c in classes:
+            header += f" {c:^{col_w}} |"
+        print(header)
+        print(dash)
+
+        # Rows
+        for i, row_label in enumerate(classes):
+            row_str = f"{row_label:>{row_w}} |"
+            for j in range(n):
+                val = matrix[i][j]
+                row_str += f" {val:^{col_w}} |"
+            print(row_str)
+
+        print(dash)
+
+        # Summary stats
+        correct = sum(matrix[i][i] for i in range(n))
+        total   = len(self.records)
+        accuracy = (correct / total * 100) if total > 0 else 0.0
+
+        print(f"\n\U0001f9e0 LATEST PREDICTION CONFIDENCE: {self.last_confidence * 100:.2f}%")
+        print(f"\U0001f3af CURRENT SESSION ACCURACY:     {accuracy:.2f}%  ({correct}/{total} correct)")
+        print(f"{sep}\n")
+
+
+# Module-level singleton — persists for the lifetime of the process (one Streamlit session)
+_session_tracker = LiveSessionTracker()
+
+
+# ---- Helper: extract DTC code from agent query ----------------
+_DTC_RE = _re.compile(r'\b([PBCU][0-9]{4})\b', _re.IGNORECASE)
+
+def _extract_actual_dtc(query: str) -> str:
+    """Pull the user-supplied DTC from the agent query.
+    Returns 'HEALTHY' if none found (no fault code given)."""
+    # Prefer DTC mentioned right after 'DTC:' label
+    m = _re.search(r'DTC[:\s]+([PBCU][0-9]{4})', query, _re.IGNORECASE)
+    if m:
+        return m.group(1).upper()
+    # Fall back to any bare DTC code in the query
+    codes = _DTC_RE.findall(query)
+    return codes[0].upper() if codes else "HEALTHY"
+
 # --- Car model keyword map ---
 _MODEL_MAP = {
     "nexon": "Tata Nexon", "harrier": "Tata Harrier", "safari": "Tata Safari",
@@ -41,7 +133,7 @@ class VehicleClassifier:
             float(sensor_data.get('VEHICLE_SPEED', 30)),
             float(sensor_data.get('ENGINE_LOAD', 35)),
             float(sensor_data.get('COOLANT_TEMP', 88)),
-            float(sensor_data.get('MAF_GRAMS_SEC', 10)),
+            float(sensor_data.get('MAF_GRAMS_SEC', 25)),
             float(sensor_data.get('SHORT_TERM_TRIM', 0)),
             float(sensor_data.get('LONG_TERM_TRIM', 0)),
             float(sensor_data.get('THROTTLE_POS', 20))
@@ -76,7 +168,7 @@ def _parse_sensor_data(query: str) -> tuple:
     sensor_data = {
         "CAR_MODEL": None, "YEAR": 2020,
         "ENGINE_RPM": None, "VEHICLE_SPEED": None, "ENGINE_LOAD": None,
-        "COOLANT_TEMP": None, "MAF_GRAMS_SEC": 10,
+        "COOLANT_TEMP": None, "MAF_GRAMS_SEC": 25,
         "SHORT_TERM_TRIM": None, "LONG_TERM_TRIM": None, "THROTTLE_POS": None
     }
     extracted = 0
@@ -217,6 +309,12 @@ def predict_root_cause(query: str):
         base_score = round(result["confidence"] * 100)
         penalty = 15 if fields_extracted < 3 else (5 if fields_extracted < 5 else 0)
         result["ml_score_hint"] = max(0, base_score - penalty)
+
+        # ---- Live session tracking --------------------------------
+        actual_dtc   = _extract_actual_dtc(query)
+        predicted_dtc = result["prediction"]
+        _session_tracker.log(actual_dtc, predicted_dtc, result["confidence"])
+        # -----------------------------------------------------------
 
         return json.dumps(result)
 
