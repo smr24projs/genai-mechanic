@@ -1,0 +1,2 @@
+2026-02-28 12:11:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260228.log
+2026-02-28 12:11:44 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started

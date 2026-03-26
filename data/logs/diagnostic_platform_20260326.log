@@ -1,0 +1,40 @@
+2026-03-26 11:11:57 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:11:57 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:12:00 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:12:00 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:12:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:12:09 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:12:16 | src.utils.logger_setup | INFO     | extract_and_validate_vision_data:906 | Vision data validated: {'rpm': 5000, 'speed': 119, 'load': 0, 'temp': 100, 'dtc': 'P0100'}
+2026-03-26 11:12:16 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Vision_Extraction took 5122.92ms
+2026-03-26 11:12:16 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:12:16 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:12:27 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:12:27 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:12:38 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:12:38 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:12:40 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:12:40 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:12:46 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:12:46 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:14:09 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:14:09 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:14:40 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 21979.07ms
+2026-03-26 11:14:40 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:14:40 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:15:22 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:15:22 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:15:30 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:15:30 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:15:44 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:15:44 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:15:56 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:15:56 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:16:08 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:16:08 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:16:36 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 23374.27ms
+2026-03-26 11:16:36 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:16:36 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:17:06 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:17:06 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
+2026-03-26 11:17:12 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260326.log
+2026-03-26 11:17:12 | src.utils.logger_setup | INFO     | <module>:703 | Enhanced application started
