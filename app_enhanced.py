@@ -6,6 +6,13 @@
 # import time
 # import os
 # import sys
+
+# # Fix gRPC DNS + SSL issues on macOS Python 3.13
+# import certifi
+# os.environ.setdefault('GRPC_DNS_RESOLVER', 'native')
+# os.environ.setdefault('SSL_CERT_FILE', certifi.where())
+# os.environ.setdefault('GRPC_DEFAULT_SSL_ROOTS_FILE_PATH', certifi.where())
+
 # import json
 # import base64
 # import re
@@ -38,7 +45,7 @@
 #     from src.agents.advisor import langgraph_app, parser
 #     logger = setup_logging()
 #     logger.info("Enhanced application started")
-# except ImportError as e:
+# except Exception as e:
 #     st.error(f"Critical Import Error: {e}")
 #     logger = None
 
@@ -54,16 +61,16 @@
 # # Professional CSS with Aggressive Light Mode Overrides
 # st.markdown("""
 #     <style>
-#     /* 1. Force Light White-Blue Theme across the app */
+#     /* Force Light White-Blue Theme across the app */
 #     .stApp { background-color: #FFFFFF !important; }
 #     [data-testid="stAppViewContainer"] { background: #FFFFFF !important; }
 #     [data-testid="stSidebar"] { background-color: #F8FCFF !important; border-right: 1px solid #E2E8F0 !important; }
     
-#     /* 2. Global Text Overrides */
+#     /* Global Text Overrides */
 #     h1, h2, h3, h4, h5, h6, label { color: #001F5B !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
 #     p, span, li { color: #1F2937 !important; }
 
-#     /* 3. AGGRESSIVE INPUT BOX OVERRIDES */
+#     /* AGGRESSIVE INPUT BOX OVERRIDES */
 #     div[data-baseweb="input"] > div, 
 #     div[data-baseweb="textarea"], 
 #     div[data-baseweb="select"] > div {
@@ -107,7 +114,7 @@
 #     }
 #     [data-testid="stFileUploader"] section { color: #001F5B !important; }
     
-#     /* 4. Fix Expanders */
+#     /* Fix Expanders */
 #     [data-testid="stExpander"] details {
 #         border: 1px solid #A5C8ED !important;
 #         border-radius: 8px !important;
@@ -121,7 +128,7 @@
 #     [data-testid="stExpander"] summary:hover { background-color: #E6F2FF !important; }
 #     [data-testid="stExpander"] svg { color: #001F5B !important; }
 
-#     /* 5. Clean Enterprise Header */
+#     /* Clean Enterprise Header */
 #     .custom-header {
 #         background: linear-gradient(135deg, #FFFFFF 0%, #F0F7FF 100%);
 #         padding: 35px 45px;
@@ -149,7 +156,7 @@
 #     .header-main-title { margin: 0; color: #001F5B !important; font-size: 2.6rem !important; font-weight: 900; letter-spacing: -0.5px; position: relative; z-index: 2;}
 #     .header-subtitle { margin: 8px 0 0 0; color: #0052CC !important; font-size: 1.1rem !important; font-weight: 700; position: relative; z-index: 2;}
     
-#     /* 6. Metrics inside Header */
+#     /* Metrics inside Header */
 #     .top-metrics-container {
 #         display: flex; gap: 20px;
 #         background: #FFFFFF;
@@ -163,7 +170,7 @@
 #     .top-metric-value { color: #001F5B !important; font-size: 1.8rem; font-weight: 900; line-height: 1.2; }
 #     .top-metric-unit { font-size: 0.8rem; color: #0052CC !important; font-weight: 800; }
 
-#     /* 7. General UI Elements */
+#     /* General UI Elements */
 #     .step-container {
 #         background-color: #FFFFFF; padding: 16px; border-left: 5px solid #0052CC;
 #         margin-bottom: 12px; border-radius: 0 8px 8px 0; border: 1px solid #E2E8F0;
@@ -178,7 +185,7 @@
 #     .card-label { font-weight: 800; font-size: 0.75rem; color: #64748B !important; text-transform: uppercase; display: block; margin-bottom: 4px; }
 #     .card-score { color: #10B981 !important; font-weight: 900; font-size: 1.6rem; line-height: 1; }
     
-#     /* 8. BUTTON VISIBILITY FIX */
+#     /* BUTTON VISIBILITY FIX */
 #     div[data-testid="stButton"] button {
 #         border-radius: 8px !important; 
 #         font-weight: 700 !important; 
@@ -209,6 +216,7 @@
 # if 'session_id' not in st.session_state: st.session_state.session_id = str(datetime.now().timestamp())
 # if 'vision_calls' not in st.session_state: st.session_state.vision_calls = 0
 # if 'agent_latency_ms' not in st.session_state: st.session_state.agent_latency_ms = 0
+# if 'uploader_key' not in st.session_state: st.session_state.uploader_key = 0 # <-- FIX 1: KEY TO ENABLE UPLOADER RESET
 
 # defaults = {
 #     'rpm_val': 0, 'speed_val': 0, 'load_val': 0, 'temp_val': 0, 
@@ -218,7 +226,11 @@
 #     if key not in st.session_state: st.session_state[key] = val
 
 # # Initialize LLM
-# llm_flash = ChatGoogleGenerativeAI(model=CONFIG.model_name, temperature=CONFIG.temperature)
+# llm_flash = ChatGoogleGenerativeAI(
+#     model=CONFIG.model_name,
+#     temperature=CONFIG.temperature,
+#     google_api_key=os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"),
+# )
 
 # # ==========================================
 # # ENHANCED: UTILITY FUNCTIONS
@@ -347,7 +359,12 @@
 
 #     with st.expander("Automated Data Intake", expanded=True):
 #         st.markdown("**Upload a diagnostic scanner image:**")
-#         uploaded_image = st.file_uploader("Upload Scanner / Dashboard Image", type=["jpg", "png", "webp", "jpeg"])
+#         # <-- FIX 1 IMPLEMENTED: Dynamic key added to file uploader
+#         uploaded_image = st.file_uploader(
+#             "Upload Scanner / Dashboard Image", 
+#             type=["jpg", "png", "webp", "jpeg"],
+#             key=f"uploader_{st.session_state.uploader_key}" 
+#         )
         
 #         if uploaded_image:
 #             image_id = f"{uploaded_image.name}_{uploaded_image.size}"
@@ -418,7 +435,7 @@
 #     with st.container(border=True):
 #         st.markdown("**Manual Context**")
 #         st.session_state.car_model_val = st.text_input(
-#             "Vehicle Model", value=st.session_state.car_model_val, placeholder="e.g., Tata Safari 2.0L"
+#             "Vehicle Model", value=st.session_state.car_model_val, placeholder="e.g., Tata Safari"
 #         )
 #         st.session_state.dtc_val = st.text_input("Active Fault Codes (DTC)", value=st.session_state.dtc_val)
 #         st.session_state.symptom_val = st.text_area("Symptom Description", value=st.session_state.symptom_val, height=60)
@@ -438,6 +455,7 @@
 #         st.session_state.messages = []
 #         st.session_state.processed_images = set()
 #         st.session_state.vision_calls = 0
+#         st.session_state.uploader_key += 1 # <-- FIX 1 IMPLEMENTED: Increments on reset
 #         st.rerun()
 
 # # ==========================================
@@ -446,8 +464,7 @@
 # st.markdown(f"""
 #     <div class="custom-header">
 #         <div class="header-title-container">
-#             <h1 class="header-main-title">Tata Technologies</h1>
-#             <p class="header-subtitle">Enterprise Diagnostic Intelligence</p>
+#             <h1 class="header-main-title">Smart Vehicle Diagnostic</h1>
 #         </div>
 #         <div class="top-metrics-container">
 #             <div class="top-metric-item">
@@ -480,16 +497,28 @@
 #     with st.chat_message(msg["role"], avatar=USER_AVATAR if msg["role"] == "user" else AI_AVATAR):
 #         if msg["type"] == "text":
 #             st.markdown(msg["content"])
-#         else:
+        
+#         elif msg["type"] == "conversational_diagnostic":
+#             d = msg["data"]
+#             st.markdown(d["diagnosis"])
+#             if d.get("action_plan"):
+#                 st.markdown("**Details & Steps:**")
+#                 for step in d["action_plan"]:
+#                     st.markdown(f"- {clean_industry_text(step)}")
+                    
+#         elif msg["type"] == "structured":
 #             d = msg["data"]
 #             st.subheader(f"{d['main_heading']}", divider="blue")
             
-#             safe_conf = str(d.get('confidence_level', '90')).replace('%', '').strip()
+#             safe_conf = d.get('confidence_score', d.get('confidence_level', 'N/A'))
+#             rag_score = d.get('rag_score', 'N/A')
+#             ml_score = d.get('ml_score', 'N/A')
+#             conf_display = f"{safe_conf}%" if isinstance(safe_conf, int) else str(safe_conf)
             
 #             c1, c2, c3 = st.columns(3)
-#             with c1: st.markdown(f"<div class='confidence-card'><span class='card-label'>RAG Knowledge</span><span class='card-score'>{d.get('rag_score', 92)}%</span></div>", unsafe_allow_html=True)
-#             with c2: st.markdown(f"<div class='confidence-card'><span class='card-label'>ML Predictive</span><span class='card-score'>{d.get('ml_score', 88)}%</span></div>", unsafe_allow_html=True)
-#             with c3: st.markdown(f"<div class='confidence-card'><span class='card-label'>Overall</span><span class='card-score'>{safe_conf}%</span></div>", unsafe_allow_html=True)
+#             with c1: st.markdown(f"<div class='confidence-card'><span class='card-label'>RAG Knowledge</span><span class='card-score'>{rag_score}{'%' if isinstance(rag_score, int) else ''}</span></div>", unsafe_allow_html=True)
+#             with c2: st.markdown(f"<div class='confidence-card'><span class='card-label'>ML Predictive</span><span class='card-score'>{ml_score}{'%' if isinstance(ml_score, int) else ''}</span></div>", unsafe_allow_html=True)
+#             with c3: st.markdown(f"<div class='confidence-card'><span class='card-label'>Overall</span><span class='card-score'>{conf_display}</span></div>", unsafe_allow_html=True)
             
 #             st.markdown(f"**Final Verdict:** {d['diagnosis']}")
 #             with st.expander("View Technical Evidence"):
@@ -522,57 +551,77 @@
 #                     st.success("Saved to history.")
 
 # if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
-#     try:
-#         is_valid, validation_msg = InputValidator.validate_diagnostic_input(
-#             st.session_state.car_model_val, st.session_state.dtc_val if st.session_state.dtc_val else None,
-#             st.session_state.symptom_val, { 'rpm': st.session_state.rpm_val, 'speed': st.session_state.speed_val, 'load': st.session_state.load_val, 'temp': st.session_state.temp_val }
-#         )
-#         if not is_valid and st.session_state.car_model_val:
-#             st.warning(f"Input Warning: {validation_msg}")
-#     except DataValidationError as e:
-#         st.warning(f"{str(e)}")
-
 #     with st.chat_message("user"):
 #         st.markdown(user_text)
     
 #     with st.spinner("Synthesizing Diagnostic Insights..."):
 #         try:
-#             # --- THE CONVERSATIONAL FIX ---
+#             # <-- FIX 2: Triage model simplified. Conversational response is handled separately to prevent JSON crashes.
 #             class Triage(BaseModel):
-#                 is_diagnostic: bool = Field(description="True ONLY if user reports a NEW vehicle issue needing a full diagnostic report.")
-#                 is_follow_up: bool = Field(description="True if user asks a follow-up question (tools, cost, details) about the previous diagnosis.")
-#                 is_sufficient: bool = Field(description="True if enough info is provided.")
-#                 response: str = Field(description="If is_diagnostic is False, put your full conversational answer here.")
-#                 missing: list
+#                 is_diagnostic: bool = Field(description="True ONLY if the user is reporting a NEW vehicle issue AND wants a full system diagnosis.")
+#                 is_follow_up: bool = Field(description="True if the user asks for procedures, guides, specs, tools, or follow-up questions.")
+#                 is_sufficient: bool = Field(description="True ONLY if enough specific technical info is provided, or if it is a follow-up.")
+#                 missing: list = Field(description="List of specific missing data points if is_sufficient is False.")
 #                 ui_main_heading: str
 #                 ui_steps_heading: str
                 
 #             t_parser = PydanticOutputParser(pydantic_object=Triage)
             
-#             # Fetch context so Triage knows what to answer
-#             history_context = "No previous diagnosis."
+#             history_context = "No previous interaction."
 #             if st.session_state.messages:
-#                 last_msg = st.session_state.messages[-1]
-#                 if last_msg["role"] == "assistant" and last_msg["type"] == "structured":
-#                     history_context = f"Previous Diagnosis: {last_msg['data'].get('diagnosis')}\nSteps: {last_msg['data'].get('action_plan')}"
-            
+#                 recent = st.session_state.messages[-6:] 
+#                 history_parts = []
+#                 for m in recent:
+#                     role = m["role"].upper()
+#                     if m["type"] == "text":
+#                         history_parts.append(f"{role}: {m['content'][:300]}")
+#                     elif m["type"] in ("structured", "conversational_diagnostic"):
+#                         d = m.get("data", {})
+#                         history_parts.append(f"{role}: [DIAGNOSIS] {d.get('diagnosis', '')[:200]}")
+#                 if history_parts:
+#                     history_context = "\n".join(history_parts)
+
+#             clarify_count = sum(
+#                 1 for m in st.session_state.messages
+#                 if m["role"] == "assistant" and m["type"] == "text"
+#                 and ("could you" in m["content"].lower() or "please" in m["content"].lower() or "can you" in m["content"].lower())
+#             )
+#             already_asked = clarify_count >= 1
+
 #             t_prompt = (
-#                 f"Context from previous turn:\n{history_context}\n\n"
-#                 f"User Input: '{user_text}' | Vehicle: {st.session_state.car_model_val}, DTC: {st.session_state.dtc_val}\n"
-#                 "CRITICAL RULES:\n"
-#                 "1. If user describes a NEW issue, set is_diagnostic=True and is_follow_up=False.\n"
-#                 "2. If user asks a FOLLOW-UP question (like 'what tools?', 'explain step 1'), set is_diagnostic=False, is_follow_up=True, and write the full answer in the 'response' field using the Context.\n"
-#                 "3. If general chat, set is_diagnostic=False and reply in 'response'.\n"
+#                 f"Conversation so far:\n{history_context}\n\n"
+#                 f"NEW User Input: '{user_text}'\n"
+#                 f"Sidebar Data → Vehicle: {st.session_state.car_model_val} | DTC: {st.session_state.dtc_val} | "
+#                 f"Sensors: RPM={st.session_state.rpm_val}, Speed={st.session_state.speed_val}, Load={st.session_state.load_val}%, Temp={st.session_state.temp_val}C\n\n"
+#                 "CRITICAL RULES (follow in order):\n"
+#                 "1. If the user asks for a procedure, step-by-step guide, list of tools, torque specs, or general info, set is_diagnostic=False and is_follow_up=True. THIS PREVENTS SYSTEM CRASHES.\n"
+#                 "2. If the user is asking a FOLLOW-UP question about a previous diagnosis, set is_diagnostic=False, is_follow_up=True.\n"
+#                 "3. If the user is explicitly reporting a NEW vehicle fault to be diagnosed, set is_diagnostic=True.\n"
+#                 f"4. IMPORTANT: A clarifying question has {'ALREADY BEEN ASKED' if already_asked else 'NOT yet been asked'}. "
+#                 f"{'You MUST set is_sufficient=True. DO NOT ask another question.' if already_asked else 'If critical data (vehicle model AND symptom) is missing AND no DTC is given, you may set is_sufficient=False.'}\n"
+#                 "5. If a DTC code is present, OR sensor readings are present, OR a vehicle model + symptom is given → set is_sufficient=True.\n"
 #                 f"{t_parser.get_format_instructions()}"
 #             )
             
 #             t_res = llm_flash.invoke(t_prompt)
-#             intent = t_parser.parse(t_res.content.replace('```json','').replace('```','').strip())
+#             raw_json = extract_json_from_response(t_res.content)
+#             intent = t_parser.parse(json.dumps(raw_json))
 
-#             # Bypasses the heavy agent and outputs standard text for tools/follow-ups
-#             if not intent.is_diagnostic:
+#             if already_asked and intent.is_diagnostic:
+#                 intent.is_sufficient = True
+
+#             # <-- FIX 2 (Continued): If it's a follow-up, we generate the long text safely outside of JSON parsing.
+#             if not intent.is_diagnostic or not intent.is_sufficient:
+#                 if not intent.is_sufficient:
+#                     sys_msg = f"Ask a brief clarifying question regarding the missing data: {', '.join(intent.missing)}"
+#                 else:
+#                     sys_msg = "Provide a comprehensive, detailed answer to the user's request. Include step-by-step guides, tools, or specs if they were requested."
+                    
+#                 resp_prompt = f"Context: {history_context}\nUser: {user_text}\nSystem: {sys_msg}"
+#                 resp_res = llm_flash.invoke(resp_prompt)
+                
 #                 st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
-#                 st.session_state.messages.append({"role": "assistant", "content": intent.response, "type": "text"})
+#                 st.session_state.messages.append({"role": "assistant", "content": resp_res.content, "type": "text"})
 #                 st.rerun()
 
 #             full_input = (
@@ -586,13 +635,28 @@
 #             current_path = "Live Path: START"
 #             flow_container.markdown(current_path)
             
+#             # ---------------------------------------------------------
+#             # TERMINAL SHOWCASE: WORKFLOW START
+#             # ---------------------------------------------------------
+#             print(f"\n{'='*70}")
+#             print(f"🚀 INITIATING TATA TECHNOLOGIES AGENTIC WORKFLOW")
+#             print(f"   Session ID: {st.session_state.session_id}")
+#             print(f"   Input: {user_text[:50]}...")
+#             print(f"{'='*70}")
+            
 #             start_time = time.time()
 #             final_state = None
             
 #             for output in langgraph_app.stream({"messages": [HumanMessage(content=full_input)]}):
 #                 for node_name, state_update in output.items():
+#                     # Update UI
 #                     current_path += f" ➔ `{node_name.upper()}`"
 #                     flow_container.markdown(current_path)
+                    
+#                     # Update Terminal
+#                     t_stamp = datetime.now().strftime("%H:%M:%S")
+#                     print(f"[{t_stamp}] ⚙️  NODE EXECUTED: {node_name.upper()}")
+                    
 #                     final_state = state_update
             
 #             duration_ms = (time.time() - start_time) * 1000
@@ -609,6 +673,21 @@
             
 #             validated = parser.parse(raw_output.replace("```json", "").replace("```", "").strip())
             
+#             # ---------------------------------------------------------
+#             # TERMINAL SHOWCASE: DIAGNOSTIC RESULTS
+#             # ---------------------------------------------------------
+#             print(f"\n{'-'*70}")
+#             print(f"✅ WORKFLOW COMPLETE ({duration_ms:.0f}ms)")
+#             print(f"   Confidence Level : {validated.confidence_level} ({validated.confidence_score}%)")
+#             print(f"   RAG Score        : {validated.rag_score}%")
+#             print(f"   ML Score         : {validated.ml_score}%")
+#             print(f"{'-'*70}")
+#             print(f"DIAGNOSIS:\n{validated.diagnosis}\n")
+#             print(f"ACTION PLAN:")
+#             for i, step in enumerate(validated.action_plan, 1):
+#                 print(f"  {i}. {clean_industry_text(step)}")
+#             print(f"{'='*70}\n")
+            
 #             structured_data = {
 #                 "id": str(datetime.now().timestamp()),
 #                 "main_heading": intent.ui_main_heading or "Diagnostic Analysis Results",
@@ -619,6 +698,9 @@
 #                 "action_plan": validated.action_plan,
 #                 "safety_warning": validated.safety_warning,
 #                 "confidence_level": validated.confidence_level,
+#                 "confidence_score": validated.confidence_score,
+#                 "rag_score": validated.rag_score,
+#                 "ml_score": validated.ml_score, # <-- FIX 3: Pulls exactly from LangGraph agent terminal score
 #                 "vehicle_model": st.session_state.car_model_val,
 #                 "dtc_codes": st.session_state.dtc_val,
 #                 "symptoms": st.session_state.symptom_val,
@@ -635,15 +717,25 @@
 #                 perf_logger.log_execution_time("Agent_Execution", duration_ms)
             
 #             st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
-#             st.session_state.messages.append({"role": "assistant", "type": "structured", "data": structured_data})
+            
+#             if intent.is_follow_up:
+#                 st.session_state.messages.append({"role": "assistant", "type": "conversational_diagnostic", "data": structured_data})
+#             else:
+#                 st.session_state.messages.append({"role": "assistant", "type": "structured", "data": structured_data})
+                
 #             st.rerun()
             
 #         except AgentExecutionError as e:
 #             st.error(handle_streamlit_error(e, "Agent Error"))
 #         except DataValidationError as e:
-#             st.error(handle_streamlit_error(e, "Validation Error"))
+#             # <-- FIX 2 (Continued): If validation ever fails again, it posts a friendly chat instead of a red error box.
+#             st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
+#             st.session_state.messages.append({"role": "assistant", "content": f"⚠️ **Data Validation Issue:** {str(e)}\n\nPlease ensure the live sensor data in the sidebar is within normal operating ranges before running a full diagnostic.", "type": "text"})
+#             st.rerun()
 #         except Exception as e:
-#             st.error(handle_streamlit_error(e, "System Error"))
+#             st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
+#             st.session_state.messages.append({"role": "assistant", "content": f"⚠️ System Error: {str(e)}", "type": "text"})
+#             st.rerun()
 
 # # ==========================================
 # # FOOTER: STATISTICS
@@ -659,7 +751,6 @@
 # st.markdown("<div style='text-align: center; color: #001F5B; font-weight: 900; font-size: 14px;'>Powered by Tata Technologies | Smart Vehicle Diagnostic Platform</div>", unsafe_allow_html=True)
 
 
-# Some new version 
 
 """
 Enhanced Vehicle Diagnostic Platform - v2.0
@@ -671,8 +762,6 @@ import os
 import sys
 
 # Fix gRPC DNS + SSL issues on macOS Python 3.13
-# c-ares DNS resolver fails on macOS; use native resolver instead
-# Also set SSL cert paths for gRPC
 import certifi
 os.environ.setdefault('GRPC_DNS_RESOLVER', 'native')
 os.environ.setdefault('SSL_CERT_FILE', certifi.where())
@@ -688,6 +777,8 @@ from PIL import Image
 import io
 from dotenv import load_dotenv
 import pandas as pd
+import numpy as np
+import joblib
 
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -715,6 +806,16 @@ except Exception as e:
     logger = None
 
 # ==========================================
+# LOAD RANDOM FOREST MODELS
+# ==========================================
+try:
+    rf_model = joblib.load('models/dtc_classifier.pkl')
+    target_encoder = joblib.load('models/target_label_encoder.pkl')
+    car_encoder = joblib.load('models/car_model_encoder.pkl')
+except Exception as e:
+    rf_model, target_encoder, car_encoder = None, None, None
+
+# ==========================================
 # ENHANCED: UI CONFIG & ENTERPRISE THEME
 # ==========================================
 st.set_page_config(
@@ -723,7 +824,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Professional CSS with Aggressive Light Mode Overrides
 st.markdown("""
     <style>
     /* Force Light White-Blue Theme across the app */
@@ -881,6 +981,7 @@ if 'processed_images' not in st.session_state: st.session_state.processed_images
 if 'session_id' not in st.session_state: st.session_state.session_id = str(datetime.now().timestamp())
 if 'vision_calls' not in st.session_state: st.session_state.vision_calls = 0
 if 'agent_latency_ms' not in st.session_state: st.session_state.agent_latency_ms = 0
+if 'uploader_key' not in st.session_state: st.session_state.uploader_key = 0
 
 defaults = {
     'rpm_val': 0, 'speed_val': 0, 'load_val': 0, 'temp_val': 0, 
@@ -1023,7 +1124,11 @@ with st.sidebar:
 
     with st.expander("Automated Data Intake", expanded=True):
         st.markdown("**Upload a diagnostic scanner image:**")
-        uploaded_image = st.file_uploader("Upload Scanner / Dashboard Image", type=["jpg", "png", "webp", "jpeg"])
+        uploaded_image = st.file_uploader(
+            "Upload Scanner / Dashboard Image", 
+            type=["jpg", "png", "webp", "jpeg"],
+            key=f"uploader_{st.session_state.uploader_key}"
+        )
         
         if uploaded_image:
             image_id = f"{uploaded_image.name}_{uploaded_image.size}"
@@ -1114,6 +1219,7 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.processed_images = set()
         st.session_state.vision_calls = 0
+        st.session_state.uploader_key += 1
         st.rerun()
 
 # ==========================================
@@ -1160,9 +1266,10 @@ for idx, msg in enumerate(st.session_state.messages):
             d = msg["data"]
             st.markdown(d["diagnosis"])
             if d.get("action_plan"):
-                st.markdown("**Details & Steps:**")
-                for step in d["action_plan"]:
-                    st.markdown(f"- {clean_industry_text(step)}")
+                st.subheader(f"{d.get('steps_heading', 'Details & Steps')}")
+                for i, step in enumerate(d["action_plan"], 1):
+                    clean_step = clean_industry_text(step)
+                    st.markdown(f"""<div class='step-container'><span class='step-number'>Step {i}:</span>{clean_step}</div>""", unsafe_allow_html=True)
                     
         elif msg["type"] == "structured":
             d = msg["data"]
@@ -1218,17 +1325,15 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 is_diagnostic: bool = Field(description="True ONLY if user reports a NEW vehicle issue.")
                 is_follow_up: bool = Field(description="True if user asks a follow-up question.")
                 is_sufficient: bool = Field(description="True ONLY if enough specific technical info is provided.")
-                response: str = Field(description="If is_diagnostic is False, OR if is_sufficient is False, put your conversational answer or clarifying question here.")
-                missing: list = Field(description="List of specific missing data points.")
+                missing: list = Field(description="List of specific missing data points if is_sufficient is False.")
                 ui_main_heading: str
                 ui_steps_heading: str
                 
             t_parser = PydanticOutputParser(pydantic_object=Triage)
             
-            # Build rich history context from all recent messages
             history_context = "No previous interaction."
             if st.session_state.messages:
-                recent = st.session_state.messages[-6:]  # last 3 exchanges
+                recent = st.session_state.messages[-6:] 
                 history_parts = []
                 for m in recent:
                     role = m["role"].upper()
@@ -1240,39 +1345,78 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 if history_parts:
                     history_context = "\n".join(history_parts)
 
-            # Count how many clarifying question rounds have already happened
-            clarify_count = sum(
-                1 for m in st.session_state.messages
-                if m["role"] == "assistant" and m["type"] == "text"
-                and ("could you" in m["content"].lower() or "please" in m["content"].lower() or "can you" in m["content"].lower())
-            )
-            already_asked = clarify_count >= 1
-
+            # <-- FIX: OVERRIDE COMPLETELY REMOVED FOR 100% STRICT GATEKEEPER
             t_prompt = (
                 f"Conversation so far:\n{history_context}\n\n"
                 f"NEW User Input: '{user_text}'\n"
                 f"Sidebar Data → Vehicle: {st.session_state.car_model_val} | DTC: {st.session_state.dtc_val} | "
                 f"Sensors: RPM={st.session_state.rpm_val}, Speed={st.session_state.speed_val}, Load={st.session_state.load_val}%, Temp={st.session_state.temp_val}C\n\n"
                 "CRITICAL RULES (follow in order):\n"
-                "1. If the user is asking a FOLLOW-UP question about a previous diagnosis (tools, cost, explanation), set is_diagnostic=False, is_follow_up=True. Answer in 'response'.\n"
-                "2. If the user describes a NEW vehicle fault or symptom → is_diagnostic=True.\n"
-                f"3. IMPORTANT: A clarifying question has {'ALREADY BEEN ASKED' if already_asked else 'NOT yet been asked'}. "
-                f"{'You MUST set is_sufficient=True and proceed with a diagnosis now using whatever info is available. DO NOT ask another question.' if already_asked else 'If critical data (vehicle model AND symptom) is missing AND no DTC is given, you may ask ONE clarifying question by setting is_sufficient=False.'}\n"
-                "4. If a DTC code is present, OR sensor readings are present, OR a vehicle model + symptom is given → set is_sufficient=True.\n"
+                "1. If the user asks MULTIPLE questions at once (e.g. reporting a fault AND asking a follow-up like cost/tools), set is_diagnostic=True and is_follow_up=True.\n"
+                "2. If the user is asking a FOLLOW-UP question about a previous diagnosis (tools, cost, explanation), set is_diagnostic=False, is_follow_up=True.\n"
+                "3. If the user describes a NEW vehicle fault or symptom → is_diagnostic=True.\n"
+                "4. HYPER-STRICT GATEKEEPER: A proper diagnosis REQUIRES Live Sensor Data. If the Sidebar Sensors (RPM, Speed, Load, Temp) are mostly 0, you MUST set is_sufficient=False and explicitly add 'Live Sensor Readings' to the 'missing' array. DO NOT bypass this rule.\n"
+                "5. ALSO, if the Vehicle Model or specific symptoms are missing, set is_sufficient=False and list them in the 'missing' array.\n"
+                "6. ONLY set is_sufficient=True if you have Symptoms, Vehicle Model, AND valid non-zero Sensor Data.\n"
+                "7. CRITICAL: Ensure JSON formatting is strictly valid. Do NOT use unescaped line breaks inside strings. Use '\\n'.\n"
                 f"{t_parser.get_format_instructions()}"
             )
             
             t_res = llm_flash.invoke(t_prompt)
-            intent = t_parser.parse(t_res.content.replace('```json','').replace('```','').strip())
-
-            # Force diagnosis if user already answered a clarifying question
-            if already_asked and intent.is_diagnostic:
-                intent.is_sufficient = True
+            
+            try:
+                intent = t_parser.parse(t_res.content.replace('```json','').replace('```','').strip())
+            except Exception:
+                try:
+                    cleaned_content = re.sub(r'(?<!\\)\n', r'\\n', t_res.content.replace('```json','').replace('```','').strip())
+                    intent = t_parser.parse(cleaned_content)
+                except Exception:
+                    intent = Triage(
+                        is_diagnostic=False, 
+                        is_follow_up=True, 
+                        is_sufficient=True, 
+                        missing=[],
+                        ui_main_heading="Analysis",
+                        ui_steps_heading="Action Plan"
+                    )
 
             if not intent.is_diagnostic or not intent.is_sufficient:
-                st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
-                st.session_state.messages.append({"role": "assistant", "content": intent.response, "type": "text"})
-                st.rerun()
+                if not intent.is_sufficient:
+                    # <-- Explicit instruction to direct user to the sidebar
+                    sys_msg = f"Politely inform the user that a full diagnosis cannot be run without the following missing data: {', '.join(intent.missing)}. If live sensor data is missing, explicitly instruct them to enter it in the 'Live Sensor Data' section in the left sidebar."
+                    resp_prompt = f"Context: {history_context}\nUser: {user_text}\nSystem: {sys_msg}"
+                    resp_res = llm_flash.invoke(resp_prompt)
+                    
+                    st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
+                    st.session_state.messages.append({"role": "assistant", "content": resp_res.content, "type": "text"})
+                    st.rerun()
+                else:
+                    sys_msg = "Provide a comprehensive, detailed answer to the user's request. Include step-by-step guides, tools, or specs if they were requested."
+                    resp_prompt = f"Context: {history_context}\nUser: {user_text}\nSystem: {sys_msg}\nFormat your response as a valid JSON with two keys: 'diagnosis' (your main explanation) and 'action_plan' (a list of strings representing the steps/tools)."
+                    
+                    try:
+                        resp_res = llm_flash.invoke(resp_prompt)
+                        raw_followup = extract_json_from_response(resp_res.content)
+                        followup_data = json.loads(json.dumps(raw_followup))
+                        
+                        followup_dict = {
+                            "id": str(datetime.now().timestamp()),
+                            "main_heading": "Analysis",
+                            "diagnosis": followup_data.get("diagnosis", resp_res.content),
+                            "action_plan": followup_data.get("action_plan", []),
+                            "steps_heading": "Details & Steps"
+                        }
+                    except Exception:
+                        followup_dict = {
+                            "id": str(datetime.now().timestamp()),
+                            "diagnosis": resp_res.content,
+                            "action_plan": [],
+                            "steps_heading": "Details & Steps"
+                        }
+                        
+                    st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
+                    st.session_state.messages.append({"role": "assistant", "type": "conversational_diagnostic", "data": followup_dict})
+                    st.rerun()
 
             full_input = (
                 f"Vehicle: {st.session_state.car_model_val} | DTC: {st.session_state.dtc_val} | "
@@ -1285,9 +1429,6 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
             current_path = "Live Path: START"
             flow_container.markdown(current_path)
             
-            # ---------------------------------------------------------
-            # TERMINAL SHOWCASE: WORKFLOW START
-            # ---------------------------------------------------------
             print(f"\n{'='*70}")
             print(f"🚀 INITIATING TATA TECHNOLOGIES AGENTIC WORKFLOW")
             print(f"   Session ID: {st.session_state.session_id}")
@@ -1299,11 +1440,9 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
             
             for output in langgraph_app.stream({"messages": [HumanMessage(content=full_input)]}):
                 for node_name, state_update in output.items():
-                    # Update UI
                     current_path += f" ➔ `{node_name.upper()}`"
                     flow_container.markdown(current_path)
                     
-                    # Update Terminal
                     t_stamp = datetime.now().strftime("%H:%M:%S")
                     print(f"[{t_stamp}] ⚙️  NODE EXECUTED: {node_name.upper()}")
                     
@@ -1323,9 +1462,6 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
             
             validated = parser.parse(raw_output.replace("```json", "").replace("```", "").strip())
             
-            # ---------------------------------------------------------
-            # TERMINAL SHOWCASE: DIAGNOSTIC RESULTS
-            # ---------------------------------------------------------
             print(f"\n{'-'*70}")
             print(f"✅ WORKFLOW COMPLETE ({duration_ms:.0f}ms)")
             print(f"   Confidence Level : {validated.confidence_level} ({validated.confidence_score}%)")
@@ -1350,7 +1486,7 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 "confidence_level": validated.confidence_level,
                 "confidence_score": validated.confidence_score,
                 "rag_score": validated.rag_score,
-                "ml_score": validated.ml_score,
+                "ml_score": validated.ml_score, 
                 "vehicle_model": st.session_state.car_model_val,
                 "dtc_codes": st.session_state.dtc_val,
                 "symptoms": st.session_state.symptom_val,
@@ -1378,10 +1514,12 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
         except AgentExecutionError as e:
             st.error(handle_streamlit_error(e, "Agent Error"))
         except DataValidationError as e:
-            st.error(handle_streamlit_error(e, "Validation Error"))
+            st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
+            st.session_state.messages.append({"role": "assistant", "content": f"⚠️ **Data Validation Issue:** {str(e)}\n\nPlease ensure the live sensor data in the sidebar is within normal operating ranges before running a full diagnostic.", "type": "text"})
+            st.rerun()
         except Exception as e:
             st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
-            st.session_state.messages.append({"role": "assistant", "content": f"⚠️ Error: {str(e)}", "type": "text"})
+            st.session_state.messages.append({"role": "assistant", "content": f"⚠️ System Error: {str(e)}", "type": "text"})
             st.rerun()
 
 # ==========================================

@@ -6,7 +6,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 load_dotenv()
 
-COLLECTION_NAME = "vehicle_manuals"   # vehicle_manuals_v2 was empty; data is in vehicle_manuals
+COLLECTION_NAME = "vehicle_manuals_v2"   # vehicle_manuals_v2 was empty; data is in vehicle_manuals
 EMBEDDING_MODEL = "models/gemini-embedding-001"
 
 # Lazy initialization — connect on first use
