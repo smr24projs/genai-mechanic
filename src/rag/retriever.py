@@ -132,7 +132,7 @@ def get_vectorstore():
     # Load credentials from .env
     api_endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
     token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
-    collection = os.getenv("ASTRA_DB_COLLECTION", "vehicle_manuals_v2") # Default to v2 if missing
+    collection = os.getenv("ASTRA_DB_COLLECTION", "vehicle_manuals") # Default to vehicle_manuals
     
     if not api_endpoint or not token:
         print("❌ Error: Missing AstraDB credentials in .env")

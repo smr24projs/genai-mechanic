@@ -164,6 +164,7 @@ class DiagnosticResponse(BaseModel):
     confidence_score: int = Field(description="Overall confidence as an integer percentage 0-100, e.g. 87.")
     rag_score: int = Field(description="Integer 0-100 reflecting how well the RAG knowledge base matched this case.")
     ml_score: int = Field(description="Integer 0-100 reflecting the ML classifier confidence for the predicted root cause.")
+    web_score: int = Field(description="Integer 0-100 reflecting the quality/relevance of web search results. 80 if multiple relevant results, 40 if partial, 10 if none.")
     ml_evidence: str
     rag_evidence: str
     web_evidence: str
@@ -174,6 +175,7 @@ parser = PydanticOutputParser(pydantic_object=DiagnosticResponse)
 
 class AgentState(TypedDict):
     messages: Annotated[List[BaseMessage], operator.add]
+    decision_log: Annotated[List[str], operator.add]
 
 # ==========================================
 # 3. NODES WITH ENHANCED LOGGING
@@ -201,9 +203,13 @@ Extract these fields from the input and build the JSON:
   - "VEHICLE_SPEED": speed in km/h as a number
   - "ENGINE_LOAD": engine load percentage as a number
   - "COOLANT_TEMP": temperature in Celsius as a number
+  - "MAF_GRAMS_SEC": MAF in g/s as a number
+  - "SHORT_TERM_TRIM": Short Term Trim percentage as a number
+  - "LONG_TERM_TRIM": Long Term Trim percentage as a number
+  - "THROTTLE_POS": Throttle Position percentage as a number
   - "DTC": the DTC code string if present (e.g. "P0171"), else omit
 
-Example: {{"CAR_MODEL": "Tata Nexon", "ENGINE_RPM": 750, "VEHICLE_SPEED": 0, "ENGINE_LOAD": 30, "COOLANT_TEMP": 90, "DTC": "P0171"}}
+Example: {{"CAR_MODEL": "Tata Nexon", "ENGINE_RPM": 750, "VEHICLE_SPEED": 0, "ENGINE_LOAD": 30, "COOLANT_TEMP": 90, "MAF_GRAMS_SEC": 25, "SHORT_TERM_TRIM": 0, "LONG_TERM_TRIM": 0, "THROTTLE_POS": 20, "DTC": "P0171"}}
 
 For vehicle_diagnostic_db and vehicle_web_search, write a natural language query including the DTC code and symptoms.
 
@@ -212,8 +218,12 @@ STEP 2 - SCORES: After running the tools, read the score hints they return:
   - If data_quality is 'LOW', subtract 15 from ml_score_hint.
 - From vehicle_diagnostic_db output → read 'RAG_SCORE_HINT' (integer 0-100). Use this EXACTLY as rag_score.
   - If output says "No matching manual section found", set rag_score=5.
-- confidence_score = weighted average: (ml_score * 0.4) + (rag_score * 0.35) + (web_quality * 0.25)
-  where web_quality = 80 if web search returned multiple relevant results, 40 if partial, 10 if no results.
+- confidence_score = MAXIMUM of (ml_score, rag_score, web_score). The overall confidence should reflect your strongest piece of evidence, do NOT average them.
+- Web Search Score (web_score): Evaluate the string returned by vehicle_web_search.
+  - 85-100: Results explicitly confirm the EXACT vehicle model & DTC with a clear common fix.
+  - 50-70: Results discuss the DTC well, but for a different car OR the fix is debated.
+  - 10-30: Generic SEO pages or barely relevant forum links.
+  - 0: No results or tool failed.
 - confidence_level = "High" if confidence_score >= 75, "Medium" if >= 50, "Low" otherwise.
 
 STEP 3 - FORMAT: Output ONLY this JSON object (no other text):
@@ -222,33 +232,104 @@ STEP 3 - FORMAT: Output ONLY this JSON object (no other text):
     messages = [SystemMessage(content=agent_template)] + state['messages']
     response = llm_with_tools.invoke(messages)
     
+    decision_entry = []
     if response.tool_calls:
+        tool_names = [t['name'] for t in response.tool_calls]
+        decision_entry.append(f"REASONER → Dispatching {len(tool_names)} tool(s): {', '.join(tool_names)}")
         for t in response.tool_calls:
             TerminalLogger.info("Action", f"Calling tool '{t['name']}' with args {t['args']}")
-    return {"messages": [response]}
+    else:
+        decision_entry.append("REASONER → All evidence gathered, synthesizing final answer")
+    
+    return {"messages": [response], "decision_log": decision_entry}
 
 def tool_logger_node(state: AgentState):
-    last_msg = state['messages'][-1]
-    if isinstance(last_msg, ToolMessage):
-        # Find which tool was just run
-        tool_name = "Unknown Tool"
-        for msg in reversed(state['messages'][:-1]):
-            if hasattr(msg, 'tool_calls') and msg.tool_calls:
-                tool_name = msg.tool_calls[0]['name']
-                break
-        TerminalLogger.tool_result(tool_name, last_msg.content)
-    return state
+    decision_entry = []
+    
+    # Find the last AIMessage with tool_calls, then collect all ToolMessages after it
+    ai_msg_idx = None
+    for i in range(len(state['messages']) - 1, -1, -1):
+        msg = state['messages'][i]
+        if hasattr(msg, 'tool_calls') and msg.tool_calls:
+            ai_msg_idx = i
+            break
+    
+    if ai_msg_idx is None:
+        return {"messages": [], "decision_log": decision_entry}
+    
+    ai_msg = state['messages'][ai_msg_idx]
+    # Build map from tool_call_id → tool_name
+    call_map = {tc['id']: tc['name'] for tc in ai_msg.tool_calls} if ai_msg.tool_calls else {}
+    
+    # Process all ToolMessages after the AIMessage
+    for msg in state['messages'][ai_msg_idx + 1:]:
+        if not isinstance(msg, ToolMessage):
+            continue
+        tool_name = call_map.get(getattr(msg, 'tool_call_id', ''), 'Unknown Tool')
+        content = msg.content or ''
+        TerminalLogger.tool_result(tool_name, content)
+        
+        if tool_name == 'predict_root_cause':
+            try:
+                result = json.loads(content)
+                status = result.get('status', 'UNKNOWN')
+                conf = result.get('confidence', 0)
+                pred = result.get('prediction', '?')
+                ml_hint = result.get('ml_score_hint', 0)
+                quality = result.get('data_quality', 'UNKNOWN')
+                quality_short = quality.split('—')[0].strip() if '—' in str(quality) else str(quality)
+                decision_entry.append(
+                    f"ML CLASSIFIER → Predicted: {pred} | Confidence: {conf*100:.0f}% | "
+                    f"Status: {status} | Data Quality: {quality_short} | ML Score: {ml_hint}"
+                )
+                if status == 'UNCERTAIN':
+                    decision_entry.append("ML DECISION → Low confidence, deeper RAG + web research triggered")
+                else:
+                    decision_entry.append("ML DECISION → High confidence, direct diagnosis identified")
+            except Exception as e:
+                decision_entry.append(f"ML CLASSIFIER → Output received (parse: {str(e)[:40]})")
+        elif tool_name == 'vehicle_diagnostic_db':
+            import re as _re
+            rag_match = _re.search(r'RAG_SCORE_HINT:\s*(\d+)', content)
+            rag_score = rag_match.group(1) if rag_match else '?'
+            if 'No matching manual section found' in content:
+                decision_entry.append(f"RAG DATABASE → No match found | RAG Score: 0")
+            else:
+                decision_entry.append(f"RAG DATABASE → Manual sections found | RAG Score: {rag_score}")
+        elif tool_name == 'vehicle_web_search':
+            try:
+                results = json.loads(content)
+                if isinstance(results, list):
+                    n = len(results)
+                    decision_entry.append(f"WEB SEARCH → {n} result(s) found")
+                elif isinstance(results, dict) and 'error' in results:
+                    decision_entry.append(f"WEB SEARCH → Error: {results['error'][:60]}")
+                else:
+                    decision_entry.append(f"WEB SEARCH → Results received")
+            except Exception:
+                decision_entry.append(f"WEB SEARCH → Results received")
+        else:
+            decision_entry.append(f"TOOL: {tool_name} → Executed")
+    
+    return {"messages": [], "decision_log": decision_entry}
 
 # ==========================================
 # 4. GRAPH CONSTRUCTION
 # ==========================================
+def _route_reasoner(state: AgentState) -> str:
+    """Router: decide whether to call tools or finish."""
+    last_msg = state['messages'][-1]
+    if last_msg.tool_calls:
+        return "tools"
+    return END
+
 workflow = StateGraph(AgentState)
 workflow.add_node("reasoner", diagnostic_reasoner)
 workflow.add_node("tools", ToolNode(tools))
 workflow.add_node("logger", tool_logger_node)
 
 workflow.add_edge(START, "reasoner")
-workflow.add_conditional_edges("reasoner", lambda x: "tools" if x['messages'][-1].tool_calls else END)
+workflow.add_conditional_edges("reasoner", _route_reasoner)
 workflow.add_edge("tools", "logger")
 workflow.add_edge("logger", "reasoner")
 
@@ -262,19 +343,19 @@ class LegacyAgentExecutorWrapper:
         TerminalLogger.header("New Session Initiated")
         TerminalLogger.info("Input", inputs.get("input")[:100] + "...")
         
-        result = langgraph_app.invoke({"messages": [HumanMessage(content=inputs.get("input", ""))]})
+        result = langgraph_app.invoke({"messages": [HumanMessage(content=inputs.get("input", ""))], "decision_log": []})
         
         final_content = result["messages"][-1].content
+        decision_log = result.get("decision_log", [])
         TerminalLogger.header("Final Agent Verdict")
         try:
-            # Try to print pretty-printed JSON
             parsed = json.loads(final_content.replace("```json", "").replace("```", "").strip())
             print(json.dumps(parsed, indent=4))
         except:
             print(final_content)
         print("="*50 + "\n")
         
-        return {"output": final_content}
+        return {"output": final_content, "decision_log": decision_log}
     
     def get_graph(self):
         return langgraph_app.get_graph()
