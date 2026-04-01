@@ -8,3 +8,4 @@ pypdf
 chromadb
 faiss-cpu
 langchain-community
+reportlab

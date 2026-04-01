@@ -893,6 +893,70 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0, 82, 204, 0.3); 
     }
     div[data-testid="stButton"] button:hover p { color: #FFFFFF !important; }
+
+    /* =============================================
+       WORKFLOW TRACKER (Light Enterprise Theme)
+       ============================================= */
+    .workflow-tracker-wrap {
+        background: linear-gradient(135deg, #F0F7FF 0%, #FFFFFF 100%);
+        border: 1.5px solid #A5C8ED;
+        border-radius: 12px;
+        padding: 18px 22px;
+        margin: 8px 0 16px 0;
+        font-family: 'Segoe UI', sans-serif;
+        box-shadow: 0 2px 12px rgba(0,31,91,0.06);
+    }
+    .workflow-tracker-wrap.wf-success {
+        border-color: #10B981;
+        background: linear-gradient(135deg, #ECFDF5 0%, #FFFFFF 100%);
+    }
+    .workflow-tracker-wrap.wf-error {
+        border-color: #EF4444;
+        background: linear-gradient(135deg, #FEF2F2 0%, #FFFFFF 100%);
+    }
+    .wf-header {
+        display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+    }
+    .wf-header-icon { font-size: 1.1rem; }
+    .wf-header-title {
+        font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.8px; color: #001F5B !important; margin: 0;
+    }
+    .wf-header-title.wf-title-success { color: #059669 !important; }
+    .wf-header-title.wf-title-error   { color: #DC2626 !important; }
+    .wf-path {
+        display: flex; align-items: center; flex-wrap: nowrap;
+        overflow-x: auto; gap: 6px; padding-bottom: 4px;
+    }
+    .wf-node {
+        display: flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 20px;
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.6px;
+        text-transform: uppercase; white-space: nowrap;
+        background: #EFF6FF; border: 1px solid #BFDBFE; color: #64748B !important;
+        transition: all 0.3s ease;
+    }
+    .wf-node.wf-completed { color: #059669 !important; border-color: #6EE7B7; background: #ECFDF5; }
+    .wf-node.wf-active { color: #2563EB !important; border-color: #3B82F6; background: #DBEAFE; box-shadow: 0 0 12px rgba(59,130,246,0.20); }
+    .wf-connector { height: 2px; width: 18px; background: #CBD5E1; flex-shrink: 0; }
+    .wf-spinner {
+        width: 10px; height: 10px;
+        border: 2px solid rgba(59,130,246,0.3); border-right-color: #3B82F6;
+        border-radius: 50%; display: inline-block;
+        animation: wfspin 0.9s linear infinite; margin-left: 4px; vertical-align: middle;
+    }
+    @keyframes wfspin { to { transform: rotate(360deg); } }
+    .wf-decisions {
+        margin-top: 14px; padding-top: 12px; border-top: 1px solid #E2E8F0;
+    }
+    .wf-decision-item {
+        display: flex; align-items: flex-start; gap: 8px; padding: 5px 0;
+        font-size: 0.73rem; color: #475569 !important;
+        font-family: 'Segoe UI', monospace; line-height: 1.4;
+    }
+    .wf-decision-icon { flex-shrink: 0; font-size: 0.75rem; }
+    .wf-decision-text { color: #334155 !important; }
+    .wf-decision-text strong { color: #001F5B !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -980,64 +1044,233 @@ def call_vision_api(encoded_image: str):
 def generate_diagnostic_report_pdf(diagnosis_data: dict) -> bytes:
     try:
         from reportlab.lib.pagesizes import letter
-        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, KeepTogether
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib import colors
+        from reportlab.lib.enums import TA_CENTER
 
         buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=40, bottomMargin=40, leftMargin=40, rightMargin=40)
         elements = []
         styles = getSampleStyleSheet()
 
-        elements.append(Paragraph(f"<b>Vehicle Diagnostic Report</b>", styles['Heading1']))
-        elements.append(Spacer(1, 12))
+        title_style = ParagraphStyle('ReportTitle', parent=styles['Heading1'], fontSize=22, textColor=colors.HexColor('#001F5B'), alignment=TA_CENTER, spaceAfter=20)
+        subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#64748B'), alignment=TA_CENTER)
+        h2_style = ParagraphStyle('H2', parent=styles['Heading2'], fontSize=14, textColor=colors.HexColor('#0F172A'), spaceBefore=15, spaceAfter=8)
+        body_style = ParagraphStyle('Body', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor('#334155'))
 
-        vehicle_model = diagnosis_data.get('vehicle_model', 'N/A')
-        dtc_codes = diagnosis_data.get('dtc_codes', 'N/A')
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        elements.append(Paragraph("<b>SMART VEHICLE DIAGNOSTIC REPORT</b>", title_style))
+        elements.append(Paragraph(f"Generated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", subtitle_style))
+        elements.append(Spacer(1, 20))
 
-        info_table = Table([
-            ['Vehicle Model:', vehicle_model],
-            ['DTC Codes:', dtc_codes],
-            ['Report Date:', timestamp],
-            ['Confidence:', f"{str(diagnosis_data.get('confidence_level', '0')).strip('%')}%"],
-        ])
+        vehicle_model = str(diagnosis_data.get('vehicle_model', 'N/A')).strip() or 'N/A'
+        dtc_codes = str(diagnosis_data.get('dtc_codes', 'N/A')).strip() or 'N/A'
+        symptoms = str(diagnosis_data.get('symptoms', 'N/A')).strip() or 'N/A'
+        conf_score = diagnosis_data.get('confidence_score', diagnosis_data.get('confidence_level', 'N/A'))
+        rag_score = diagnosis_data.get('rag_score', 'N/A')
+        ml_score = diagnosis_data.get('ml_score', 'N/A')
+
+        info_rows = [
+            ['Vehicle Model', vehicle_model],
+            ['DTC Codes', dtc_codes],
+            ['Symptoms', symptoms[:200] + '...' if len(symptoms) > 200 else symptoms],
+            ['ML Predictive Score', f"{ml_score}%" if isinstance(ml_score, (int, float)) else str(ml_score)],
+            ['RAG Knowledge Score', f"{rag_score}%" if isinstance(rag_score, (int, float)) else str(rag_score)],
+            ['Overall Confidence', f"{conf_score}%" if isinstance(conf_score, (int, float)) else str(conf_score)],
+        ]
+        info_table = Table(info_rows, colWidths=[150, 370])
         info_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
-            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#F0F7FF')),
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#001F5B')),
+            ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#334155')),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         elements.append(info_table)
-        elements.append(Spacer(1, 12))
+        elements.append(Spacer(1, 20))
 
-        elements.append(Paragraph("<b>Final Diagnosis:</b>", styles['Heading2']))
-        elements.append(Paragraph(diagnosis_data.get('diagnosis', 'N/A'), styles['Normal']))
-        elements.append(Spacer(1, 12))
+        elements.append(Paragraph("<b>Final Diagnosis</b>", h2_style))
+        diagnosis_text = Paragraph(diagnosis_data.get('diagnosis', 'N/A'), body_style)
+        diag_table = Table([[diagnosis_text]], colWidths=[520])
+        diag_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#ECFDF5')),
+            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#10B981')),
+            ('TOPPADDING', (0, 0), (-1, -1), 15),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
+            ('LEFTPADDING', (0, 0), (-1, -1), 15),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+        ]))
+        elements.append(diag_table)
+        elements.append(Spacer(1, 15))
 
-        elements.append(Paragraph("<b>Recommended Actions:</b>", styles['Heading2']))
+        elements.append(Paragraph("<b>Recommended Action Plan</b>", h2_style))
         for i, action in enumerate(diagnosis_data.get('action_plan', []), 1):
-            # --- BUG FIX: PDF Fallback ---
             if isinstance(action, dict):
                 action_str = action.get("step", action.get("action", action.get("description", str(action))))
             else:
                 action_str = str(action)
-            elements.append(Paragraph(f"{i}. {action_str}", styles['Normal']))
-        elements.append(Spacer(1, 12))
+            step_text = Paragraph(f"<b>Step {i}:</b> {action_str}", body_style)
+            step_table = Table([[step_text]], colWidths=[520])
+            step_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8FAFC')),
+                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+            ]))
+            elements.append(KeepTogether([step_table, Spacer(1, 8)]))
+
+        if diagnosis_data.get('decision_path'):
+            elements.append(Paragraph("<b>Agent Execution Log</b>", h2_style))
+            node_labels = {"START": "INITIALIZE", "reasoner": "REASONING", "tools": "TOOL EXEC", "logger": "PARSE DATA", "__end__": "COMPLETE", "END": "COMPLETE"}
+            wf_history = diagnosis_data.get('wf_history', [])
+            pipeline_table = None
+            if wf_history:
+                row_data = []
+                clean_nodes = [n.replace('__START__', 'START').replace('__END__', 'END') for n in wf_history]
+                if len(clean_nodes) > 5:
+                    clean_nodes = clean_nodes[:2] + ["..."] + clean_nodes[-2:]
+                node_font = ParagraphStyle('NodeF', fontSize=7, alignment=TA_CENTER, textColor=colors.HexColor('#059669'))
+                arrow_font = ParagraphStyle('ArrowF', fontSize=9, alignment=TA_CENTER, textColor=colors.HexColor('#CBD5E1'))
+                for i_n, node in enumerate(clean_nodes):
+                    label = node_labels.get(node, node.upper())
+                    row_data.append(Paragraph(f"<b>{label}</b>", node_font))
+                    if i_n < len(clean_nodes) - 1:
+                        row_data.append(Paragraph("<b>--</b>", arrow_font))
+                if row_data:
+                    pipeline_table = Table([row_data], colWidths=None, hAlign='LEFT')
+                    style_cmds = [('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]
+                    for ci in range(len(row_data)):
+                        if ci % 2 == 0:
+                            style_cmds.extend([
+                                ('BACKGROUND', (ci, 0), (ci, 0), colors.HexColor('#ECFDF5')),
+                                ('BOX', (ci, 0), (ci, 0), 1, colors.HexColor('#6EE7B7')),
+                                ('TOPPADDING', (ci, 0), (ci, 0), 6), ('BOTTOMPADDING', (ci, 0), (ci, 0), 6),
+                                ('LEFTPADDING', (ci, 0), (ci, 0), 8), ('RIGHTPADDING', (ci, 0), (ci, 0), 8),
+                            ])
+                    pipeline_table.setStyle(TableStyle(style_cmds))
+
+            log_mono_style = ParagraphStyle('LogMono', fontName='Courier-Bold', fontSize=8, textColor=colors.HexColor('#334155'), leading=12)
+            styled_logs = []
+            for step in diagnosis_data['decision_path']:
+                styled_logs.append(Paragraph(f"<font color='#F97316'>* </font> {step}", log_mono_style))
+            log_table = Table([[line] for line in styled_logs], colWidths=[500])
+            log_table.setStyle(TableStyle([('LEFTPADDING', (0,0), (-1,-1), 0), ('TOPPADDING', (0,0), (-1,-1), 4), ('BOTTOMPADDING', (0,0), (-1,-1), 4)]))
+
+            container_elements_pdf = []
+            header_style = ParagraphStyle('UIHeader', fontSize=10, textColor=colors.HexColor('#059669'), spaceAfter=12)
+            container_elements_pdf.append(Paragraph("<b>AGENT EXECUTION COMPLETE</b>", header_style))
+            if pipeline_table:
+                container_elements_pdf.append(pipeline_table)
+                container_elements_pdf.append(Spacer(1, 14))
+            container_elements_pdf.append(log_table)
+            master_table = Table([[container_elements_pdf]], colWidths=[520])
+            master_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#FAFAFA')),
+                ('BOX', (0,0), (-1,-1), 1.5, colors.HexColor('#6EE7B7')),
+                ('TOPPADDING', (0,0), (-1,-1), 16), ('BOTTOMPADDING', (0,0), (-1,-1), 16),
+                ('LEFTPADDING', (0,0), (-1,-1), 16), ('RIGHTPADDING', (0,0), (-1,-1), 16),
+            ]))
+            elements.append(KeepTogether([master_table]))
 
         if diagnosis_data.get('safety_warning') and diagnosis_data['safety_warning'].lower() != 'none':
-            elements.append(Paragraph(f"<b>Safety Warning:</b>", styles['Heading3']))
-            elements.append(Paragraph(diagnosis_data['safety_warning'], styles['Normal']))
+            elements.append(Paragraph("<b>Safety Warning</b>", h2_style))
+            elements.append(Paragraph(diagnosis_data['safety_warning'], body_style))
+
+        # --- Embed Confusion Matrix Heatmap ---
+        cm_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'confusion_matrix.png')
+        if os.path.exists(cm_path):
+            from reportlab.platypus import Image as RLImage
+            elements.append(Spacer(1, 15))
+            elements.append(Paragraph("<b>Model Performance (Confusion Matrix)</b>", h2_style))
+            
+            try:
+                img = RLImage(cm_path)
+                # Scale image to fit within the PDF margins
+                aspect = img.imageHeight / float(img.imageWidth)
+                img.drawWidth = 400
+                img.drawHeight = 400 * aspect
+                img.hAlign = 'CENTER'
+                
+                cm_table = Table([[img]], colWidths=[520])
+                cm_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#FAFAFA')),
+                    ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#CBD5E1')),
+                    ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                    ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                    ('TOPPADDING', (0,0), (-1,-1), 10),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+                ]))
+                elements.append(KeepTogether([cm_table]))
+            except Exception as e:
+                pass # Fail silently if image can't be drawn so PDF still generates
+
+        elements.append(Spacer(1, 25))
+        elements.append(Paragraph("<i>Powered by Tata Technologies | Smart Vehicle Diagnostic Platform</i>", subtitle_style))
 
         doc.build(elements)
         return buffer.getvalue()
     except Exception as e:
         if logger: logger.error(f"Failed to generate PDF: {str(e)}")
-        st.warning("Could not generate PDF report")
+        st.warning(f"Could not generate PDF report: {str(e)}")
         return None
+
+# ==========================================
+# WORKFLOW TRACKER RENDER HELPER
+# ==========================================
+NODE_ICONS = {"START": "⚡", "reasoner": "🧠", "tools": "🔧", "logger": "📋", "__end__": "✅", "END": "✅"}
+NODE_LABELS = {"START": "Initialize", "reasoner": "Reasoning", "tools": "Tool Exec", "logger": "Parse Data", "__end__": "Complete", "END": "Complete"}
+
+def render_workflow_tracker(history: list, active_node: str | None, is_complete: bool, is_error: bool = False, decisions: list | None = None) -> str:
+    if not history:
+        return ""
+    if is_error:
+        wrap_cls, icon, title_cls, title = "workflow-tracker-wrap wf-error", "❌", "wf-title-error", "Agent Execution Failed"
+    elif is_complete:
+        wrap_cls, icon, title_cls, title = "workflow-tracker-wrap wf-success", "✅", "wf-title-success", "Agent Execution Complete"
+    else:
+        wrap_cls, icon, title_cls, title = "workflow-tracker-wrap", "⚙️", "", "Agent Execution Live"
+
+    nodes_html = ""
+    for i, node in enumerate(history):
+        is_active = (node == active_node and not is_complete and not is_error)
+        node_cls = "wf-node wf-active" if is_active else "wf-node wf-completed"
+        icon_str = NODE_ICONS.get(node, "🔹")
+        label = NODE_LABELS.get(node, node.upper())
+        spinner = '<span class="wf-spinner"></span>' if is_active else ""
+        nodes_html += f'<div class="{node_cls}">{icon_str} {label}{spinner}</div>'
+        if i < len(history) - 1:
+            nodes_html += '<div class="wf-connector"></div>'
+
+    decisions_html = ""
+    if decisions:
+        entries = ""
+        for d in decisions:
+            if isinstance(d, str) and '→' in d:
+                parts = d.split('→', 1)
+                entry_text = f'<strong>{parts[0].strip()}</strong> → {parts[1].strip()}'
+            else:
+                entry_text = str(d)
+            entries += f'<div class="wf-decision-item"><span class="wf-decision-icon">🔸</span><span class="wf-decision-text">{entry_text}</span></div>'
+        decisions_html = f'<div class="wf-decisions">{entries}</div>'
+
+    return f"""
+    <div class="{wrap_cls}">
+        <div class="wf-header">
+            <span class="wf-header-icon">{icon}</span>
+            <p class="wf-header-title {title_cls}">{title}</p>
+        </div>
+        <div class="wf-path">{nodes_html}</div>
+        {decisions_html}
+    </div>
+    """
 
 # ==========================================
 # ENHANCED: SIDEBAR DATA INGESTION
@@ -1199,14 +1432,25 @@ for idx, msg in enumerate(st.session_state.messages):
                     
         elif msg["type"] == "structured":
             d = msg["data"]
+            # Render the completed workflow tracker if available
+            if d.get('wf_history'):
+                st.markdown(render_workflow_tracker(d['wf_history'], None, True, decisions=d.get('decision_path')), unsafe_allow_html=True)
+
             st.subheader(f"{d.get('main_heading', 'Diagnostic Results')}", divider="blue")
             
-            safe_conf = str(d.get('confidence_level', '90')).replace('%', '').strip()
+            rag_s = d.get('rag_score', 0)
+            ml_s = d.get('ml_score', 0)
+            web_s = d.get('web_score', 0)
+            # Ensure they are ints for comparison
+            rag_s = int(rag_s) if isinstance(rag_s, (int, float)) else 0
+            ml_s = int(ml_s) if isinstance(ml_s, (int, float)) else 0
+            web_s = int(web_s) if isinstance(web_s, (int, float)) else 0
+            overall = max(rag_s, ml_s, web_s)
             
             c1, c2, c3 = st.columns(3)
-            with c1: st.markdown(f"<div class='confidence-card'><span class='card-label'>RAG Knowledge</span><span class='card-score'>{d.get('rag_score', 92)}%</span></div>", unsafe_allow_html=True)
-            with c2: st.markdown(f"<div class='confidence-card'><span class='card-label'>ML Predictive</span><span class='card-score'>{d.get('ml_score', 88)}%</span></div>", unsafe_allow_html=True)
-            with c3: st.markdown(f"<div class='confidence-card'><span class='card-label'>Overall</span><span class='card-score'>{safe_conf}%</span></div>", unsafe_allow_html=True)
+            with c1: st.markdown(f"<div class='confidence-card'><span class='card-label'>RAG Knowledge</span><span class='card-score'>{rag_s}%</span></div>", unsafe_allow_html=True)
+            with c2: st.markdown(f"<div class='confidence-card'><span class='card-label'>ML Predictive</span><span class='card-score'>{ml_s}%</span></div>", unsafe_allow_html=True)
+            with c3: st.markdown(f"<div class='confidence-card'><span class='card-label'>Overall Score</span><span class='card-score'>{overall}%</span></div>", unsafe_allow_html=True)
             
             st.markdown(f"**Final Verdict:** {d.get('diagnosis', '')}")
             with st.expander("View Technical Evidence"):
@@ -1290,17 +1534,40 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 f"Sensors: RPM={st.session_state.rpm_val}, Speed={st.session_state.speed_val}, "
                 f"Load={st.session_state.load_val}%, Temp={st.session_state.temp_val}C | User: {user_text}"
             )
-            
+
+            # Live workflow tracker
+            flow_container = st.empty()
+            wf_history = ["START"]
+            all_decisions = [f"TRIAGE → Routed to Full Diagnostic Pipeline (is_diagnostic={intent.is_diagnostic}, is_sufficient={intent.is_sufficient})"]
+            flow_container.markdown(render_workflow_tracker(wf_history, "START", False, decisions=all_decisions), unsafe_allow_html=True)
+
+            print(f"\n{'='*70}")
+            print(f"INITIATING TATA TECHNOLOGIES AGENTIC WORKFLOW")
+            print(f"   Session ID: {st.session_state.session_id}")
+            print(f"   Input: {user_text[:50]}...")
+            print(f"{'='*70}")
+
             start_time = time.time()
             final_state = None
-            
-            for output in langgraph_app.stream({"messages": [HumanMessage(content=full_input)]}):
+
+            for output in langgraph_app.stream({"messages": [HumanMessage(content=full_input)], "decision_log": []}):
                 for node_name, state_update in output.items():
+                    if not wf_history or wf_history[-1] != node_name:
+                        wf_history.append(node_name)
+                    new_decisions = state_update.get('decision_log', [])
+                    if new_decisions:
+                        all_decisions.extend(new_decisions)
+                    flow_container.markdown(
+                        render_workflow_tracker(wf_history, node_name, False, decisions=all_decisions),
+                        unsafe_allow_html=True
+                    )
+                    t_stamp = datetime.now().strftime("%H:%M:%S")
+                    print(f"[{t_stamp}] NODE EXECUTED: {node_name.upper()}")
                     final_state = state_update
-            
+
             duration_ms = (time.time() - start_time) * 1000
             st.session_state.agent_latency_ms = duration_ms
-            
+
             if final_state and "messages" in final_state:
                 raw_content = final_state["messages"][-1].content
                 if isinstance(raw_content, list):
@@ -1309,9 +1576,26 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                     raw_output = str(raw_content)
             else:
                 raise AgentExecutionError("Agent flow failed to return messages.")
-            
+
+            # Mark workflow complete
+            all_decisions.append(f"COMPLETE → Agent finished in {duration_ms:.0f}ms")
+            if not wf_history or wf_history[-1] not in ("END", "__end__"):
+                wf_history.append("END")
+            flow_container.markdown(
+                render_workflow_tracker(wf_history, None, True, decisions=all_decisions),
+                unsafe_allow_html=True
+            )
+
             validated = parser.parse(raw_output.replace("```json", "").replace("```", "").strip())
-            
+
+            print(f"\n{'-'*70}")
+            print(f"WORKFLOW COMPLETE ({duration_ms:.0f}ms)")
+            print(f"   Confidence: {validated.confidence_level} ({validated.confidence_score}%)")
+            print(f"   RAG Score : {validated.rag_score}%")
+            print(f"   ML Score  : {validated.ml_score}%")
+            print(f"   Web Score : {validated.web_score}%")
+            print(f"{'-'*70}")
+
             structured_data = {
                 "id": str(datetime.now().timestamp()),
                 "main_heading": intent.ui_main_heading or "Diagnostic Analysis Results",
@@ -1322,23 +1606,27 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 "action_plan": getattr(validated, "action_plan", []),
                 "safety_warning": validated.safety_warning,
                 "confidence_level": validated.confidence_level,
-                "rag_score": getattr(validated, "rag_score", 92),
-                "ml_score": getattr(validated, "ml_score", 88),
+                "confidence_score": validated.confidence_score,
+                "rag_score": validated.rag_score,
+                "ml_score": validated.ml_score,
+                "web_score": validated.web_score,
                 "vehicle_model": st.session_state.car_model_val,
                 "dtc_codes": st.session_state.dtc_val,
                 "symptoms": st.session_state.symptom_val,
+                "decision_path": all_decisions,
+                "wf_history": wf_history,
             }
-            
+
             if diagnostic_history:
                 diagnostic_history.save_diagnosis(structured_data)
-            
+
             st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
-            
+
             if intent.is_follow_up:
                 st.session_state.messages.append({"role": "assistant", "type": "conversational_diagnostic", "data": structured_data})
             else:
                 st.session_state.messages.append({"role": "assistant", "type": "structured", "data": structured_data})
-                
+
             st.rerun()
             
         except AgentExecutionError as e:
