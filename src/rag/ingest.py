@@ -21,7 +21,7 @@ def ingest_manuals():
     embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
 
     # 2. Connect to AstraDB
-    collection_name = os.getenv("ASTRA_DB_COLLECTION") or "vehicle_manuals"
+    collection_name = os.getenv("ASTRA_DB_COLLECTION") or "vehicle_manuals_v2"
     print(f"   - Connecting to AstraDB collection: {collection_name}...")
     
     vector_store = AstraDBVectorStore(

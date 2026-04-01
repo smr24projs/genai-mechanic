@@ -540,9 +540,9 @@
 #                 is_follow_up: bool = Field(description="True if user asks a follow-up question.")
 #                 is_sufficient: bool = Field(description="True ONLY if enough specific technical info is provided.")
 #                 response: str = Field(description="If is_diagnostic is False, OR if is_sufficient is False, put your conversational answer or clarifying question here.")
-#                 missing: list = Field(description="List of specific missing data points.")
-#                 ui_main_heading: str
-#                 ui_steps_heading: str
+#                 missing: list = Field(default=[], description="List of specific missing data points.")
+#                 ui_main_heading: str = Field(default="", description="Main heading for UI display (optional)")
+#                 ui_steps_heading: str = Field(default="", description="Steps heading for UI display (optional)")
                 
 #             t_parser = PydanticOutputParser(pydantic_object=Triage)
             
@@ -1496,9 +1496,9 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 is_follow_up: bool = Field(description="True if user asks a follow-up question.")
                 is_sufficient: bool = Field(description="True ONLY if enough specific technical info is provided.")
                 response: str = Field(description="If is_diagnostic is False, OR if is_sufficient is False, put your conversational answer or clarifying question here.")
-                missing: list = Field(description="List of specific missing data points.")
-                ui_main_heading: str
-                ui_steps_heading: str
+                missing: list = Field(default=[], description="List of specific missing data points.")
+                ui_main_heading: str = Field(default="", description="Main heading for UI display (optional)")
+                ui_steps_heading: str = Field(default="", description="Steps heading for UI display (optional)")
                 
             t_parser = PydanticOutputParser(pydantic_object=Triage)
             

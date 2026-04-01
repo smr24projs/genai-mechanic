@@ -10,7 +10,7 @@ load_dotenv()
 
 # Configuration
 PDF_PATH = "data/manuals/DTC_Codes.pdf"  # Ensure your PDF is in the data/ folder
-COLLECTION_NAME = "vehicle_manuals"
+COLLECTION_NAME = "vehicle_manuals_v2"
 
 def ingest_manual():
     print(f"📄 Loading Manual: {PDF_PATH}...")

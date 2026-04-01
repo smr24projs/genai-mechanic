@@ -7,7 +7,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 load_dotenv()
 
 # Configuration
-COLLECTION_NAME = "vehicle_manuals"
+COLLECTION_NAME = "vehicle_manuals_v2"
 EMBEDDING_MODEL = "models/gemini-embedding-001" 
 
 # Initialize Embedding & DB
