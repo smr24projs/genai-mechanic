@@ -731,7 +731,7 @@ try:
         InputValidator, VisionExtractionError, AgentExecutionError, DataValidationError,
         diagnostic_history,
     )
-    from src.agents.advisor import langgraph_app, parser, DiagnosticResponse
+    from src.agents.advisor import langgraph_app, parser
     logger = setup_logging()
     logger.info("Enhanced application started")
 except ImportError as e:
@@ -969,7 +969,6 @@ if 'session_id' not in st.session_state: st.session_state.session_id = str(datet
 if 'vision_calls' not in st.session_state: st.session_state.vision_calls = 0
 if 'agent_latency_ms' not in st.session_state: st.session_state.agent_latency_ms = 0
 if 'reset_count' not in st.session_state: st.session_state.reset_count = 0
-if 'uploaded_image_data' not in st.session_state: st.session_state.uploaded_image_data = None
 
 defaults = {
     'rpm_val': 0, 'speed_val': 0, 'load_val': 0, 'temp_val': 0, 
@@ -1291,11 +1290,7 @@ with st.sidebar:
 
     with st.expander("Automated Data Intake", expanded=True):
         st.markdown("**Upload a diagnostic scanner image:**")
-        uploaded_image = st.file_uploader(
-            "Upload Scanner / Dashboard Image", 
-            type=["jpg", "png", "webp", "jpeg"],
-            key=f"file_uploader_{st.session_state.reset_count}"
-        )
+        uploaded_image = st.file_uploader("Upload Scanner / Dashboard Image", type=["jpg", "png", "webp", "jpeg"], key=f"file_uploader_{st.session_state.reset_count}")
         
         if uploaded_image:
             image_id = f"{uploaded_image.name}_{uploaded_image.size}"
@@ -1381,20 +1376,14 @@ with st.sidebar:
             st.session_state.speed_val = st.number_input("Speed km/h", value=int(st.session_state.speed_val), min_value=0, max_value=300)
             st.session_state.temp_val = st.number_input("Temp °C", value=int(st.session_state.temp_val), min_value=-40, max_value=130)
 
-    if st.button("Reset Session", use_container_width=True):
-        # Reset all sensor values
+    if st.button("Reset Session", use_container_width=True, key="reset_session_btn"):
         for key, val in defaults.items(): st.session_state[key] = val
-        
-        # Reset conversation and diagnostics
         st.session_state.messages = []
         st.session_state.processed_images = set()
         st.session_state.vision_calls = 0
         st.session_state.uploaded_image_data = None
         st.session_state.agent_latency_ms = 0
-        
-        # Increment reset counter to force file_uploader widget to reset
         st.session_state.reset_count += 1
-        
         st.success("✅ Session reset successfully! All data and images cleared.")
         st.rerun()
 
@@ -1537,33 +1526,7 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
             )
             
             t_res = llm_flash.invoke(t_prompt)
-            try:
-                intent = t_parser.parse(t_res.content.replace('```json','').replace('```','').strip())
-            except Exception as e:
-                # Schema mismatch - try manual JSON parsing and field mapping
-                try:
-                    import json
-                    parsed_json = json.loads(t_res.content.replace('```json','').replace('```','').strip())
-                    
-                    # Create Triage object with defaults for missing fields
-                    intent = Triage(
-                        is_diagnostic=parsed_json.get('is_diagnostic', False),
-                        is_follow_up=parsed_json.get('is_follow_up', False),
-                        is_sufficient=parsed_json.get('is_sufficient', False),
-                        response=parsed_json.get('response', ''),
-                        missing=parsed_json.get('missing', []),
-                        ui_main_heading=parsed_json.get('ui_main_heading', ''),
-                        ui_steps_heading=parsed_json.get('ui_steps_heading', '')
-                    )
-                except:
-                    # Last resort - create default response
-                    intent = Triage(
-                        is_diagnostic=False,
-                        is_follow_up=True,
-                        is_sufficient=False,
-                        response=str(t_res.content),
-                        missing=[]
-                    )
+            intent = t_parser.parse(t_res.content.replace('```json','').replace('```','').strip())
 
             if not intent.is_diagnostic or not intent.is_sufficient:
                 st.session_state.messages.append({"role": "user", "content": user_text, "type": "text"})
@@ -1628,64 +1591,15 @@ if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
                 unsafe_allow_html=True
             )
 
-            validated = None
-            try:
-                validated = parser.parse(raw_output.replace("```json", "").replace("```", "").strip())
-            except Exception as parse_error:
-                # Schema mismatch - try manual JSON parsing and field mapping
-                try:
-                    import json
-                    parsed_json = json.loads(raw_output.replace("```json", "").replace("```", "").strip())
-                    
-                    # Create DiagnosticResponse object with defaults for missing fields
-                    validated = DiagnosticResponse(
-                        needs_more_info=parsed_json.get('needs_more_info', False),
-                        clarifying_questions=parsed_json.get('clarifying_questions', []),
-                        diagnosis=parsed_json.get('diagnosis', parsed_json.get('response', '')),
-                        confidence_level=parsed_json.get('confidence_level', 'Medium'),
-                        confidence_score=parsed_json.get('confidence_score', 0),
-                        rag_score=parsed_json.get('rag_score', 0),
-                        ml_score=parsed_json.get('ml_score', 0),
-                        web_score=parsed_json.get('web_score', 0),
-                        ml_evidence=parsed_json.get('ml_evidence', ''),
-                        rag_evidence=parsed_json.get('rag_evidence', ''),
-                        web_evidence=parsed_json.get('web_evidence', ''),
-                        action_plan=parsed_json.get('action_plan', []),
-                        safety_warning=parsed_json.get('safety_warning', 'None')
-                    )
-                except Exception as fallback_error:
-                    st.error(f"Failed to parse diagnostic response: {str(parse_error)}")
-                    validated = None
+            validated = parser.parse(raw_output.replace("```json", "").replace("```", "").strip())
 
             print(f"\n{'-'*70}")
-            if validated:
-                print(f"WORKFLOW COMPLETE ({duration_ms:.0f}ms)")
-                print(f"   Confidence: {validated.confidence_level} ({validated.confidence_score}%)")
-                print(f"   RAG Score : {validated.rag_score}%")
-                print(f"   ML Score  : {validated.ml_score}%")
-                print(f"   Web Score : {validated.web_score}%")
-            else:
-                print(f"WORKFLOW COMPLETE - Parsing failed ({duration_ms:.0f}ms)")
+            print(f"WORKFLOW COMPLETE ({duration_ms:.0f}ms)")
+            print(f"   Confidence: {validated.confidence_level} ({validated.confidence_score}%)")
+            print(f"   RAG Score : {validated.rag_score}%")
+            print(f"   ML Score  : {validated.ml_score}%")
+            print(f"   Web Score : {validated.web_score}%")
             print(f"{'-'*70}")
-            
-            # Handle case where validation failed
-            if not validated:
-                st.error("Failed to generate diagnostic response. Please try again.")
-                validated = DiagnosticResponse(
-                    needs_more_info=True,
-                    clarifying_questions=["Please provide more specific details about your vehicle issue."],
-                    diagnosis="Diagnostic processing failed. Please retry your request.",
-                    confidence_level="Low",
-                    confidence_score=0,
-                    rag_score=0,
-                    ml_score=0,
-                    web_score=0,
-                    ml_evidence="",
-                    rag_evidence="",
-                    web_evidence="",
-                    action_plan=[],
-                    safety_warning="None"
-                )
 
             structured_data = {
                 "id": str(datetime.now().timestamp()),
