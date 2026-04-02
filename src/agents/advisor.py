@@ -210,7 +210,10 @@ llm_with_tools = llm.bind_tools(tools)
 def diagnostic_reasoner(state: AgentState):
     TerminalLogger.header("Agent Reasoning")
     
+    format_instructions = parser.get_format_instructions()
     agent_template = f"""You are a Master Diagnostic AI for vehicle troubleshooting.
+
+CRITICAL INSTRUCTION: You MUST output ONLY valid JSON that strictly matches this exact schema. NO other text, NO markdown blocks, NO explanations.
 
 STEP 1 - TOOLS: You MUST call predict_root_cause, vehicle_diagnostic_db, and vehicle_web_search to gather evidence.
 
@@ -227,8 +230,11 @@ STEP 2 - SCORES: After running the tools, you MUST read the score hints they ret
 STEP 3 - FORMATTING RULES:
 - If the user asks for a repair procedure, put the sequential steps in the 'action_plan' array.
 - If the user asks for a LIST OF TOOLS, PARTS, or TORQUE SPECS, put the list inside the 'diagnosis' string using Markdown bullet points. Leave 'action_plan' COMPLETELY EMPTY [].
-- Output ONLY this JSON object (no other text):
-{parser.get_format_instructions()}"""
+
+STEP 4 - REQUIRED OUTPUT FORMAT (use ALL these exact field names):
+{format_instructions}
+
+REMINDER: Output ONLY the JSON object above. Do NOT include markdown code blocks, backticks, or any other text."""
     
     messages = [SystemMessage(content=agent_template)] + state['messages']
     response = llm_with_tools.invoke(messages)
@@ -284,6 +290,59 @@ langgraph_app = workflow.compile()
 # 5. WRAPPER (FINAL LOGGING)
 # ==========================================
 class LegacyAgentExecutorWrapper:
+    @staticmethod
+    def _parse_json_response(content: str) -> dict:
+        """
+        Robustly parse JSON response from LLM.
+        Handles markdown code blocks, escaping issues, and schema mismatches.
+        """
+        # Remove markdown code blocks if present
+        clean_content = content.replace("```json", "").replace("```", "").strip()
+        
+        # Try to parse the JSON
+        try:
+            parsed = json.loads(clean_content)
+        except json.JSONDecodeError as e:
+            TerminalLogger.info("JSON Parse Error", f"Failed to parse: {str(e)[:100]}")
+            raise ValueError(f"Invalid JSON in LLM response: {str(e)}")
+        
+        # Validate schema - check required fields
+        required_fields = {
+            'needs_more_info', 'clarifying_questions', 'diagnosis', 
+            'confidence_level', 'confidence_score', 'rag_score', 'ml_score',
+            'web_score', 'ml_evidence', 'rag_evidence', 'web_evidence',
+            'action_plan', 'safety_warning'
+        }
+        
+        missing_fields = required_fields - set(parsed.keys())
+        
+        if missing_fields:
+            TerminalLogger.info("Schema Mismatch", f"Missing fields: {missing_fields}")
+            # If critical mismatch, try to map common field names
+            if 'response' in parsed and 'diagnosis' not in parsed:
+                parsed['diagnosis'] = parsed.pop('response', '')
+            if 'is_diagnostic' in parsed:
+                parsed.pop('is_diagnostic', None)
+            if 'is_follow_up' in parsed:
+                parsed.pop('is_follow_up', None)
+            if 'is_sufficient' in parsed:
+                parsed.pop('is_sufficient', None)
+            
+            # Fill in missing fields with defaults
+            for field in missing_fields:
+                if field == 'clarifying_questions':
+                    parsed[field] = []
+                elif field == 'action_plan':
+                    parsed[field] = []
+                elif field == 'confidence_score' or field == 'ml_score' or field == 'rag_score' or field == 'web_score':
+                    parsed[field] = 0
+                elif field == 'confidence_level':
+                    parsed[field] = 'Medium'
+                else:
+                    parsed[field] = ''
+        
+        return parsed
+    
     def invoke(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         TerminalLogger.header("New Session Initiated")
         TerminalLogger.info("Input", inputs.get("input")[:100] + "...")
@@ -293,14 +352,18 @@ class LegacyAgentExecutorWrapper:
         final_content = result["messages"][-1].content
         decision_log = result.get("decision_log", [])
         TerminalLogger.header("Final Agent Verdict")
+        
         try:
-            parsed = json.loads(final_content.replace("```json", "").replace("```", "").strip())
+            parsed = self._parse_json_response(final_content)
             print(json.dumps(parsed, indent=4))
-        except:
-            print(final_content)
+        except Exception as e:
+            TerminalLogger.info("Parsing Error", str(e))
+            print(f"Raw Output:\n{final_content}")
+            parsed = {"error": str(e), "raw_output": final_content}
+        
         print("="*50 + "\n")
         
-        return {"output": final_content, "decision_log": decision_log}
+        return {"output": final_content, "decision_log": decision_log, "parsed": parsed}
     
     def get_graph(self):
         return langgraph_app.get_graph()
