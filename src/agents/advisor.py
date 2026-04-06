@@ -16,7 +16,7 @@ from src.tools.classifier_tool import predict_root_cause
 from src.tools.rag_tool import vehicle_diagnostic_db
 from src.tools.web_search import vehicle_web_search
 
-load_dotenv()
+load_dotenv(override=True)
 
 # ==========================================
 # 1. BPMN NOTATION LOGGER (INDUSTRY-STANDARD)

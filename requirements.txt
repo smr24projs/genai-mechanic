@@ -1,4 +1,3 @@
-streamlit
 langchain
 langchain-google-genai
 langchain-astradb
@@ -10,3 +9,7 @@ chromadb
 faiss-cpu
 langchain-community
 reportlab
+fastapi
+uvicorn
+python-multipart
+# Use standard library asyncio etc
