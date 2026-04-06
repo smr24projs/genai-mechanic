@@ -1042,6 +1042,50 @@ def call_vision_api(encoded_image: str):
         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}}
     ])])
 
+def sanitize_html_for_pdf(text: str) -> str:
+    """
+    Sanitize HTML content to be safe for ReportLab Paragraph parsing.
+    Fixes malformed tags, removes orphaned list tags, and escapes problematic characters.
+    """
+    if not isinstance(text, str):
+        text = str(text)
+    
+    # Remove orphaned <li> and </li> tags that shouldn't be in paragraph
+    text = re.sub(r'</?li>', '', text)
+    
+    # Fix mismatched <b> tags - replace <b>text:<b> with <b>text:</b>
+    text = re.sub(r'<b>([^<]*?):<b>', r'<b>\1:</b>', text)
+    
+    # Fix other mismatched </b> tags by ensuring they're properly paired
+    # Count opening and closing b tags
+    b_open = text.count('<b>')
+    b_close = text.count('</b>')
+    if b_open > b_close:
+        # Add missing closing tags
+        text += '</b>' * (b_open - b_close)
+    elif b_close > b_open:
+        # Remove extra closing tags
+        for _ in range(b_close - b_open):
+            idx = text.rfind('</b>')
+            if idx != -1:
+                text = text[:idx] + text[idx+4:]
+    
+    # Fix malformed <para> tags - convert to proper ReportLab format
+    text = re.sub(r'<para>', '', text)
+    text = re.sub(r'</para>', '', text)
+    
+    # Clean up multiple consecutive spaces
+    text = re.sub(r'\s+', ' ', text)
+    
+    # Escape any unmatched brackets
+    if text.count('<') != text.count('>'):
+        # If there are more closing than opening, it's likely from malformed HTML
+        # Remove problematic lone brackets
+        text = re.sub(r'<(?![a-z/])', '&lt;', text)
+        text = re.sub(r'(?<![a-z])>', '&gt;', text)
+    
+    return text.strip()
+
 def generate_diagnostic_report_pdf(diagnosis_data: dict) -> bytes:
     try:
         from reportlab.lib.pagesizes import letter
@@ -1097,7 +1141,13 @@ def generate_diagnostic_report_pdf(diagnosis_data: dict) -> bytes:
         elements.append(Spacer(1, 20))
 
         elements.append(Paragraph("<b>Final Diagnosis</b>", h2_style))
-        diagnosis_text = Paragraph(diagnosis_data.get('diagnosis', 'N/A'), body_style)
+        
+        # Convert diagnosis markdown to HTML-safe text for PDF
+        diagnosis_raw = diagnosis_data.get('diagnosis', 'N/A')
+        # Sanitize the HTML to remove malformed tags
+        diagnosis_sanitized = sanitize_html_for_pdf(diagnosis_raw)
+        
+        diagnosis_text = Paragraph(diagnosis_sanitized if diagnosis_sanitized.strip() else "N/A", body_style)
         diag_table = Table([[diagnosis_text]], colWidths=[520])
         diag_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#ECFDF5')),
@@ -1106,84 +1156,239 @@ def generate_diagnostic_report_pdf(diagnosis_data: dict) -> bytes:
             ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
             ('LEFTPADDING', (0, 0), (-1, -1), 15),
             ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ]))
         elements.append(diag_table)
         elements.append(Spacer(1, 15))
 
         elements.append(Paragraph("<b>Recommended Action Plan</b>", h2_style))
-        for i, action in enumerate(diagnosis_data.get('action_plan', []), 1):
-            if isinstance(action, dict):
-                action_str = action.get("step", action.get("action", action.get("description", str(action))))
-            else:
-                action_str = str(action)
-            step_text = Paragraph(f"<b>Step {i}:</b> {action_str}", body_style)
-            step_table = Table([[step_text]], colWidths=[520])
-            step_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8FAFC')),
-                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
+        action_plan = diagnosis_data.get('action_plan', [])
+        if action_plan and len(action_plan) > 0:
+            for i, action in enumerate(action_plan, 1):
+                if isinstance(action, dict):
+                    action_str = action.get("step", action.get("action", action.get("description", str(action))))
+                else:
+                    action_str = str(action).strip()
+                
+                # Clean up markdown if present
+                action_str = action_str.replace('**', '').replace('* ', '').replace('- ', '')
+                # Split long text into multiple paragraphs if needed
+                action_lines = action_str.split('\n')
+                action_str = ' '.join(line.strip() for line in action_lines if line.strip())
+                
+                step_text = Paragraph(f"<b>Step {i}:</b> {action_str}", body_style)
+                step_table = Table([[step_text]], colWidths=[500])
+                step_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8FAFC')),
+                    ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#E2E8F0')),
+                    ('TOPPADDING', (0, 0), (-1, -1), 12),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ]))
+                elements.append(KeepTogether([step_table, Spacer(1, 8)]))
+        else:
+            elements.append(Paragraph("<i>No specific action plan required for this inquiry.</i>", body_style))
+            elements.append(Spacer(1, 15))
+
+        # --- BEFORE/AFTER COMPARISON TABLE ---
+        before_after = diagnosis_data.get('before_after_data', {})
+        if before_after:
+            elements.append(Paragraph("<b>Before & After Comparison</b>", h2_style))
+            ba_rows = [['Parameter', 'Before', 'After', 'Unit']]
+            for param, data in before_after.items():
+                ba_rows.append([
+                    param.replace('_', ' '),
+                    str(data.get('before', 'N/A')),
+                    str(data.get('after', 'N/A')),
+                    str(data.get('unit', ''))
+                ])
+            ba_table = Table(ba_rows, colWidths=[150, 100, 100, 70])
+            ba_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0F172A')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                ('TOPPADDING', (0, 0), (-1, 0), 10),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#F0FDF4')),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#F0FDF4'), colors.HexColor('#DCFCE7')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#059669')),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            elements.append(ba_table)
+            elements.append(Spacer(1, 15))
+
+        # --- PARTS REPLACED SECTION ---
+        parts_replaced = diagnosis_data.get('parts_replaced', [])
+        if parts_replaced:
+            elements.append(Paragraph("<b>Parts Replaced & Specifications</b>", h2_style))
+            pr_rows = [['Part Name', 'Torque Spec', 'IMA Code']]
+            for part in parts_replaced:
+                pr_rows.append([
+                    part.get('part', 'N/A'),
+                    part.get('torque_spec', 'N/A'),
+                    part.get('ima_code', 'N/A')
+                ])
+            pr_table = Table(pr_rows, colWidths=[250, 120, 130])
+            pr_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#7C3AED')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                ('TOPPADDING', (0, 0), (-1, 0), 10),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#F3E8FF')),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#F3E8FF'), colors.HexColor('#EDE9FE')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#7C3AED')),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+            ]))
+            elements.append(pr_table)
+            elements.append(Spacer(1, 15))
+
+        # --- CYLINDER BALANCE VISUALIZATION ---
+        cylinder_data = diagnosis_data.get('cylinder_balance', {})
+        if cylinder_data:
+            elements.append(Paragraph("<b>Cylinder Balance Analysis</b>", h2_style))
+            cyl_rows = [['Cylinder', 'Balance Value (mg/str)', 'Status']]
+            for cyl, value in sorted(cylinder_data.items()):
+                val_float = float(value) if isinstance(value, (int, float)) else 0.0
+                if abs(val_float) < 0.15:
+                    status = "✓ Balanced"
+                    status_color = "#10B981"
+                elif abs(val_float) < 0.3:
+                    status = "⚠ Slight Deviation"
+                    status_color = "#F59E0B"
+                else:
+                    status = "✗ Out of Range"
+                    status_color = "#EF4444"
+                
+                cyl_rows.append([
+                    cyl.replace('_', ' '),
+                    f"{val_float:+.2f}",
+                    status
+                ])
+            
+            cyl_table = Table(cyl_rows, colWidths=[150, 200, 170])
+            cyl_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0EA5E9')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+                ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                ('TOPPADDING', (0, 0), (-1, 0), 10),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#F0F9FF')),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#F0F9FF'), colors.HexColor('#E0F2FE')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#0EA5E9')),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            elements.append(cyl_table)
+            elements.append(Spacer(1, 15))
+
+        if diagnosis_data.get('decision_path'):
+            elements.append(Paragraph("<b>Agent Execution Log</b>", h2_style))
+            node_labels = {"START": "START EVENT", "reasoner": "REASONING TASK", "tools": "SERVICE INVOCATION", "logger": "RESULT AGGREGATION", "__end__": "END EVENT", "END": "END EVENT"}
+            wf_history = diagnosis_data.get('wf_history', [])
+            
+            log_mono_style = ParagraphStyle('LogMono', fontName='Courier', fontSize=8.5, textColor=colors.HexColor('#1F2937'), leading=11)
+            styled_logs = []
+            
+            # Add header
+            styled_logs.append(Paragraph("<b><font color='#059669'>AGENT EXECUTION COMPLETE</font></b>", log_mono_style))
+            styled_logs.append(Spacer(1, 4))
+            
+            # Add workflow nodes
+            if wf_history:
+                clean_nodes = [n.replace('__START__', 'START').replace('__END__', 'END') for n in wf_history]
+                node_display = " ▬▶ ".join([f"<font color='#059669'>{node_labels.get(n, n.upper())}</font>" for n in clean_nodes])
+                styled_logs.append(Paragraph(f"<b>{node_display}</b>", log_mono_style))
+                styled_logs.append(Spacer(1, 6))
+            
+            # Add decision path
+            for step in diagnosis_data.get('decision_path', []):
+                styled_logs.append(Paragraph(f"<font color='#F97316'>▸</font> {step}", log_mono_style))
+            
+            log_table = Table([[line] for line in styled_logs], colWidths=[500])
+            log_table.setStyle(TableStyle([
+                ('LEFTPADDING', (0,0), (-1,-1), 0), 
+                ('TOPPADDING', (0,0), (-1,-1), 3), 
+                ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ]))
+
+            box_table = Table([[log_table]], colWidths=[520])
+            box_table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#FAFAFA')),
+                ('BOX', (0,0), (-1,-1), 1.5, colors.HexColor('#059669')),
+                ('TOPPADDING', (0,0), (-1,-1), 12), 
+                ('BOTTOMPADDING', (0,0), (-1,-1), 12),
+                ('LEFTPADDING', (0,0), (-1,-1), 12), 
+                ('RIGHTPADDING', (0,0), (-1,-1), 12),
+            ]))
+            elements.append(KeepTogether([box_table]))
+            elements.append(Spacer(1, 15))
+
+        if diagnosis_data.get('safety_warning') and diagnosis_data['safety_warning'].lower() != 'none':
+            elements.append(Paragraph("<b>Safety Alert</b>", h2_style))
+            warning_text = sanitize_html_for_pdf(diagnosis_data['safety_warning'])
+            warning_para = Paragraph(warning_text, body_style)
+            warning_table = Table([[warning_para]], colWidths=[520])
+            warning_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#FEE2E2')),
+                ('BOX', (0, 0), (-1, -1), 1.5, colors.HexColor('#EF4444')),
                 ('TOPPADDING', (0, 0), (-1, -1), 12),
                 ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
                 ('LEFTPADDING', (0, 0), (-1, -1), 12),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ]))
-            elements.append(KeepTogether([step_table, Spacer(1, 8)]))
-
-        if diagnosis_data.get('decision_path'):
-            elements.append(Paragraph("<b>Agent Execution Log</b>", h2_style))
-            node_labels = {"START": "INITIALIZE", "reasoner": "REASONING", "tools": "TOOL EXEC", "logger": "PARSE DATA", "__end__": "COMPLETE", "END": "COMPLETE"}
-            wf_history = diagnosis_data.get('wf_history', [])
-            pipeline_table = None
-            if wf_history:
-                row_data = []
-                clean_nodes = [n.replace('__START__', 'START').replace('__END__', 'END') for n in wf_history]
-                if len(clean_nodes) > 5:
-                    clean_nodes = clean_nodes[:2] + ["..."] + clean_nodes[-2:]
-                node_font = ParagraphStyle('NodeF', fontSize=7, alignment=TA_CENTER, textColor=colors.HexColor('#059669'))
-                arrow_font = ParagraphStyle('ArrowF', fontSize=9, alignment=TA_CENTER, textColor=colors.HexColor('#CBD5E1'))
-                for i_n, node in enumerate(clean_nodes):
-                    label = node_labels.get(node, node.upper())
-                    row_data.append(Paragraph(f"<b>{label}</b>", node_font))
-                    if i_n < len(clean_nodes) - 1:
-                        row_data.append(Paragraph("<b>--</b>", arrow_font))
-                if row_data:
-                    pipeline_table = Table([row_data], colWidths=None, hAlign='LEFT')
-                    style_cmds = [('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]
-                    for ci in range(len(row_data)):
-                        if ci % 2 == 0:
-                            style_cmds.extend([
-                                ('BACKGROUND', (ci, 0), (ci, 0), colors.HexColor('#ECFDF5')),
-                                ('BOX', (ci, 0), (ci, 0), 1, colors.HexColor('#6EE7B7')),
-                                ('TOPPADDING', (ci, 0), (ci, 0), 6), ('BOTTOMPADDING', (ci, 0), (ci, 0), 6),
-                                ('LEFTPADDING', (ci, 0), (ci, 0), 8), ('RIGHTPADDING', (ci, 0), (ci, 0), 8),
-                            ])
-                    pipeline_table.setStyle(TableStyle(style_cmds))
-
-            log_mono_style = ParagraphStyle('LogMono', fontName='Courier-Bold', fontSize=8, textColor=colors.HexColor('#334155'), leading=12)
-            styled_logs = []
-            for step in diagnosis_data['decision_path']:
-                styled_logs.append(Paragraph(f"<font color='#F97316'>* </font> {step}", log_mono_style))
-            log_table = Table([[line] for line in styled_logs], colWidths=[500])
-            log_table.setStyle(TableStyle([('LEFTPADDING', (0,0), (-1,-1), 0), ('TOPPADDING', (0,0), (-1,-1), 4), ('BOTTOMPADDING', (0,0), (-1,-1), 4)]))
-
-            container_elements_pdf = []
-            header_style = ParagraphStyle('UIHeader', fontSize=10, textColor=colors.HexColor('#059669'), spaceAfter=12)
-            container_elements_pdf.append(Paragraph("<b>AGENT EXECUTION COMPLETE</b>", header_style))
-            if pipeline_table:
-                container_elements_pdf.append(pipeline_table)
-                container_elements_pdf.append(Spacer(1, 14))
-            container_elements_pdf.append(log_table)
-            master_table = Table([[container_elements_pdf]], colWidths=[520])
-            master_table.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#FAFAFA')),
-                ('BOX', (0,0), (-1,-1), 1.5, colors.HexColor('#6EE7B7')),
-                ('TOPPADDING', (0,0), (-1,-1), 16), ('BOTTOMPADDING', (0,0), (-1,-1), 16),
-                ('LEFTPADDING', (0,0), (-1,-1), 16), ('RIGHTPADDING', (0,0), (-1,-1), 16),
-            ]))
-            elements.append(KeepTogether([master_table]))
-
-        if diagnosis_data.get('safety_warning') and diagnosis_data['safety_warning'].lower() != 'none':
-            elements.append(Paragraph("<b>Safety Warning</b>", h2_style))
-            elements.append(Paragraph(diagnosis_data['safety_warning'], body_style))
+            elements.append(warning_table)
+            elements.append(Spacer(1, 15))
+        
+        # Add evidence section if available
+        if diagnosis_data.get('rag_evidence') or diagnosis_data.get('web_evidence'):
+            elements.append(Paragraph("<b>Technical Evidence</b>", h2_style))
+            
+            if diagnosis_data.get('rag_evidence'):
+                elements.append(Paragraph("<i>Found in Knowledge Base:</i>", body_style))
+                rag_text_clean = sanitize_html_for_pdf(str(diagnosis_data.get('rag_evidence', 'N/A'))[:500])
+                rag_text = Paragraph(rag_text_clean, body_style)
+                rag_table = Table([[rag_text]], colWidths=[520])
+                rag_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F0FDF4')),
+                    ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCFBF1')),
+                    ('TOPPADDING', (0, 0), (-1, -1), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                ]))
+                elements.append(rag_table)
+                elements.append(Spacer(1, 8))
+            
+            if diagnosis_data.get('web_evidence'):
+                elements.append(Paragraph("<i>From External Sources:</i>", body_style))
+                web_text_clean = sanitize_html_for_pdf(str(diagnosis_data.get('web_evidence', 'N/A'))[:500])
+                web_text = Paragraph(web_text_clean, body_style)
+                web_table = Table([[web_text]], colWidths=[520])
+                web_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F0F9FF')),
+                    ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#BAE6FD')),
+                    ('TOPPADDING', (0, 0), (-1, -1), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                ]))
+                elements.append(web_table)
+            
+            elements.append(Spacer(1, 15))
 
         # --- Embed Confusion Matrix Heatmap ---
         cm_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models', 'confusion_matrix.png')
@@ -1224,10 +1429,11 @@ def generate_diagnostic_report_pdf(diagnosis_data: dict) -> bytes:
         return None
 
 # ==========================================
-# WORKFLOW TRACKER RENDER HELPER
+# BPMN WORKFLOW TRACKER RENDER HELPER
 # ==========================================
-NODE_ICONS = {"START": "⚡", "reasoner": "🧠", "tools": "🔧", "logger": "📋", "__end__": "✅", "END": "✅"}
-NODE_LABELS = {"START": "Initialize", "reasoner": "Reasoning", "tools": "Tool Exec", "logger": "Parse Data", "__end__": "Complete", "END": "Complete"}
+# BPMN Symbols: ● = Start/End, ▶ = Task, ⬢ = Service Task, ◇ = Decision
+NODE_ICONS = {"START": "●", "reasoner": "▶", "tools": "⬢", "logger": "▶", "__end__": "●", "END": "●"}
+NODE_LABELS = {"START": "Start Event", "reasoner": "Reasoning Task", "tools": "Service Invocation", "logger": "Result Aggregation", "__end__": "End Event", "END": "End Event"}
 
 def render_workflow_tracker(history: list, active_node: str | None, is_complete: bool, is_error: bool = False, decisions: list | None = None) -> str:
     if not history:
@@ -1426,6 +1632,46 @@ for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"], avatar=USER_AVATAR if msg["role"] == "user" else AI_AVATAR):
         if msg["type"] == "text":
             st.markdown(msg["content"])
+            
+            # Add action buttons for assistant text responses (follow-up questions, clarifications)
+            if msg["role"] == "assistant":
+                col1, col2, col3 = st.columns([1, 1, 1])
+                with col1:
+                    if st.button("Mark as Helpful", key=f"helpful_{idx}"):
+                        if diagnostic_history:
+                            diagnostic_history.update_resolution(f"text_{idx}", "User marked as helpful", feedback_score=5)
+                        st.success("Thank you for the feedback.")
+                with col2:
+                    if st.button("Download PDF", key=f"download_{idx}"):
+                        # Create simple PDF for text response
+                        pdf_data = {
+                            "id": f"text_{idx}",
+                            "diagnosis": msg["content"],
+                            "action_plan": [],
+                            "vehicle_model": st.session_state.car_model_val,
+                            "dtc_codes": st.session_state.dtc_val,
+                            "symptoms": st.session_state.symptom_val,
+                        }
+                        pdf_bytes = generate_diagnostic_report_pdf(pdf_data)
+                        if pdf_bytes:
+                            st.download_button(label="Click to Download", data=pdf_bytes, file_name=f"response_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf", mime="application/pdf")
+                with col3:
+                    if st.button("Save to History", key=f"save_{idx}"):
+                        response_data = {
+                            "id": f"text_{idx}",
+                            "type": "text",
+                            "content": msg["content"],
+                            "timestamp": datetime.now().isoformat(),
+                            "sensor_readings": {
+                                'rpm': st.session_state.rpm_val,
+                                'speed': st.session_state.speed_val,
+                                'load': st.session_state.load_val,
+                                'temp': st.session_state.temp_val
+                            }
+                        }
+                        if diagnostic_history:
+                            diagnostic_history.save_diagnosis(response_data)
+                        st.success("Saved to history.")
         
         elif msg["type"] == "conversational_diagnostic":
             d = msg["data"]
@@ -1434,6 +1680,26 @@ for idx, msg in enumerate(st.session_state.messages):
                 st.markdown("**Details & Steps:**")
                 for step in d["action_plan"]:
                     st.markdown(f"- {clean_industry_text(step)}")
+            
+            # Show action buttons for follow-up responses too
+            col1, col2, col3 = st.columns([1, 1, 1])
+            with col1:
+                if st.button("Mark as Helpful", key=f"helpful_{idx}"):
+                    if diagnostic_history:
+                        diagnostic_history.update_resolution(d.get('id', str(idx)), "User marked as helpful", feedback_score=5)
+                    st.success("Thank you for the feedback.")
+            with col2:
+                if st.button("Download PDF", key=f"download_{idx}"):
+                    pdf_bytes = generate_diagnostic_report_pdf(d)
+                    if pdf_bytes:
+                        st.download_button(label="Click to Download", data=pdf_bytes, file_name=f"diagnostic_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf", mime="application/pdf")
+            with col3:
+                if st.button("Save to History", key=f"save_{idx}"):
+                    d['id'] = str(idx)
+                    d['sensor_readings'] = { 'rpm': st.session_state.rpm_val, 'speed': st.session_state.speed_val, 'load': st.session_state.load_val, 'temp': st.session_state.temp_val }
+                    if diagnostic_history:
+                        diagnostic_history.save_diagnosis(d)
+                    st.success("Saved to history.")
                     
         elif msg["type"] == "structured":
             d = msg["data"]
@@ -1490,7 +1756,10 @@ for idx, msg in enumerate(st.session_state.messages):
                         diagnostic_history.save_diagnosis(d)
                     st.success("Saved to history.")
 
-if user_text := st.chat_input("Enter diagnostic query or request procedure..."):
+# ==========================================
+# CHAT INTERFACE & EXECUTION LOOP
+# ==========================================
+if user_text := st.chat_input(" Enter diagnostic query or request procedure..."):
     with st.chat_message("user"):
         st.markdown(user_text)
     

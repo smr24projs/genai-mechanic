@@ -19,24 +19,63 @@ from src.tools.web_search import vehicle_web_search
 load_dotenv()
 
 # ==========================================
-# 1. TERMINAL FORMATTING HELPER
+# 1. BPMN NOTATION LOGGER (INDUSTRY-STANDARD)
 # ==========================================
-class TerminalLogger:
+"""
+BPMN Symbol Legend:
+  ● = Process Start/End (Terminator)
+  ▶ = Task/Process Execution
+  ◇ = Exclusive Gateway (Decision Point)
+  ⬢ = Service Task / Tool Invocation
+  ▬▶ = Sequence Flow / Control Flow
+  [M] = Message/Data Flow
+"""
+class BPMNLogger:
     @staticmethod
     def header(title: str):
-        print(f"\n{'='*20} {title.upper()} {'='*20}")
+        """BPMN: Mark major process phase"""
+        print(f"\n{'='*70}")
+        print(f"  ● [{title.upper()}]")
+        print(f"{'='*70}")
 
     @staticmethod
-    def info(label: str, content: Any):
-        print(f"🔹 [{label}]: {content}")
+    def task_start(task_name: str, details: Any = None):
+        """BPMN: Process task initiated"""
+        detail_str = f" | {details}" if details else ""
+        print(f"  ▶ TASK: {task_name}{detail_str}")
 
     @staticmethod
-    def tool_result(tool_name: str, result: str):
-        print(f"\n📦 [TOOL OUTPUT: {tool_name}]")
-        print(f"{'-'*50}")
-        # Show first 800 chars in a clean block
-        print(str(result)[:800] + "..." if len(str(result)) > 800 else str(result))
-        print(f"{'-'*50}\n")
+    def decision_point(condition: str, decision: str):
+        """BPMN: Decision gateway"""
+        print(f"  ◇ DECISION: {condition} → {decision}")
+
+    @staticmethod
+    def service_invocation(tool_name: str, args: Dict[str, Any] = None):
+        """BPMN: Service task (tool) invoked"""
+        args_str = f" | Args: {str(args)[:80]}..." if args else ""
+        print(f"  ⬢ SERVICE: {tool_name}{args_str}")
+
+    @staticmethod
+    def data_flow(source: str, target: str, data: str = None):
+        """BPMN: Data/message flow between components"""
+        data_str = f" [{data}]" if data else ""
+        print(f"  [M] {source} ▬▶ {target}{data_str}")
+
+    @staticmethod
+    def process_result(tool_name: str, result: str):
+        """BPMN: Service task result received"""
+        print(f"\n  ⬢ [SERVICE OUTPUT: {tool_name}]")
+        print(f"  {'─'*66}")
+        result_preview = str(result)[:700]
+        if len(str(result)) > 700:
+            result_preview += "\n  [...truncated...]"
+        print(f"  {result_preview}")
+        print(f"  {'─'*66}\n")
+
+    @staticmethod
+    def workflow_complete(status: str):
+        """BPMN: Process completion"""
+        print(f"  ● COMPLETE: {status}\n")
 
 # ==========================================
 # 2. OUTPUT SCHEMA & STATE
@@ -55,6 +94,9 @@ class DiagnosticResponse(BaseModel):
     web_evidence: str = Field(description="Evidence from Web")
     action_plan: List[str] = Field(description="ONLY for sequential, step-by-step physical repair procedures. MUST BE EMPTY [] if answering tool requests, specs, or general info.")
     safety_warning: str = Field(description="Critical safety warnings, or 'None'")
+    before_after_data: Dict[str, Dict[str, Any]] = Field(default_factory=dict, description="Before/After comparison. Format: {'parameter_name': {'before': value, 'after': value, 'unit': 'unit'}}")
+    parts_replaced: List[Dict[str, str]] = Field(default_factory=list, description="Parts replaced. Format: [{'part': 'Part Name', 'torque_spec': '25 Nm', 'ima_code': 'IMA123'}]")
+    cylinder_balance: Dict[str, float] = Field(default_factory=dict, description="Cylinder balance data for visualization. Format: {'Cylinder_1': 0.1, 'Cylinder_2': -0.2, ...}")
 
 parser = PydanticOutputParser(pydantic_object=DiagnosticResponse)
 
@@ -74,7 +116,8 @@ tools = [predict_root_cause, vehicle_diagnostic_db, vehicle_web_search]
 llm_with_tools = llm.bind_tools(tools)
 
 def diagnostic_reasoner(state: AgentState):
-    TerminalLogger.header("Agent Reasoning")
+    BPMNLogger.header("Diagnostic Reasoning (Reasoner Task)")
+    BPMNLogger.task_start("LLM Inference", "Initializing reasoning phase")
     
     agent_template = f"""You are a Master Diagnostic AI for vehicle troubleshooting.
 
@@ -90,7 +133,22 @@ STEP 2 - SCORES: After running the tools, you MUST read the score hints they ret
 - Web Search Score (web_score): Evaluate the string returned by vehicle_web_search (0-100).
 - confidence_score = MAXIMUM of (ml_score, rag_score, web_score).
 
-STEP 3 - FORMATTING RULES:
+STEP 3 - ENHANCED REPORT SECTIONS:
+For repair diagnostic reports, ALWAYS include:
+
+A. BEFORE/AFTER COMPARISON (before_after_data):
+   If faulty vs. repaired data is mentioned, create a comparison table:
+   Example: {{"Fuel_Rail_Pressure": {{"before": "450 bar", "after": "280 bar", "unit": "bar"}}, "Injection_Correction": {{"before": "±0.5 mg/str", "after": "±0.2 mg/str", "unit": "mg/str"}}}}
+
+B. PARTS REPLACED (parts_replaced):
+   If any parts were repaired/replaced, list them with specifications:
+   Example: [{{"part": "Fuel Injector #3", "torque_spec": "25 Nm", "ima_code": "IMA-INJ-0047"}}]
+
+C. CYLINDER BALANCE DATA (cylinder_balance):
+   If injection correction or cylinder-specific data exists, provide balance metrics:
+   Example: {{"Cylinder_1": 0.1, "Cylinder_2": -0.2, "Cylinder_3": 0.15, "Cylinder_4": -0.05}}
+
+STEP 4 - FORMATTING RULES:
 - If the user asks for a repair procedure, put the sequential steps in the 'action_plan' array.
 - If the user asks for a LIST OF TOOLS, PARTS, or TORQUE SPECS, put the list inside the 'diagnosis' string using Markdown bullet points. Leave 'action_plan' COMPLETELY EMPTY [].
 - Output ONLY this JSON object (no other text):
@@ -101,27 +159,33 @@ STEP 3 - FORMATTING RULES:
     
     decision_entry = []
     if hasattr(response, 'tool_calls') and response.tool_calls:
+        BPMNLogger.decision_point("Tool calls required", "Routing to Service Invocation")
         for t in response.tool_calls:
-            TerminalLogger.info("Action", f"Calling tool '{t['name']}' with args {t['args']}")
-            decision_entry.append(f"REASONER → Calling {t['name']}")
+            BPMNLogger.service_invocation(t['name'], t['args'])
+            decision_entry.append(f"REASONER ▬▶ SERVICE: {t['name']}")
     else:
-        decision_entry.append("REASONER → Synthesizing final answer")
+        BPMNLogger.decision_point("Analysis complete", "Synthesizing final response")
+        decision_entry.append("REASONER ▬▶ OUTPUT: Final Answer")
         
     return {"messages": [response], "decision_log": decision_entry}
 
 def tool_logger_node(state: AgentState):
+    """BPMN: Service Task Result Processing"""
     decision_entry = []
     last_msg = state['messages'][-1]
     if isinstance(last_msg, ToolMessage):
         tool_name = last_msg.name if hasattr(last_msg, 'name') and last_msg.name else "Tool"
-        TerminalLogger.tool_result(tool_name, last_msg.content)
+        BPMNLogger.process_result(tool_name, last_msg.content)
         
         if 'predict_root_cause' in tool_name:
-            decision_entry.append(f"ML CLASSIFIER → Tool Output Received")
+            BPMNLogger.data_flow("ML_CLASSIFIER", "REASONER", "Confidence Scores")
+            decision_entry.append(f"ML_CLASSIFIER ▬▶ REASONER")
         elif 'vehicle_diagnostic_db' in tool_name:
-            decision_entry.append(f"RAG DATABASE → Tool Output Received")
+            BPMNLogger.data_flow("RAG_DATABASE", "REASONER", "Knowledge Base Results")
+            decision_entry.append(f"RAG_DATABASE ▬▶ REASONER")
         elif 'vehicle_web_search' in tool_name:
-            decision_entry.append(f"WEB SEARCH → Tool Output Received")
+            BPMNLogger.data_flow("WEB_SEARCH", "REASONER", "External References")
+            decision_entry.append(f"WEB_SEARCH ▬▶ REASONER")
             
     return {"decision_log": decision_entry}
 
@@ -147,28 +211,39 @@ workflow.add_edge("logger", "reasoner")
 langgraph_app = workflow.compile()
 
 # ==========================================
-# 5. WRAPPER (FINAL LOGGING)
+# 5. BPMN PROCESS ORCHESTRATOR (WRAPPER)
 # ==========================================
-class LegacyAgentExecutorWrapper:
+class BPMNProcessOrchestrator:
+    """Orchestrates the diagnostic workflow with BPMN-compliant process tracking"""
+    
     def invoke(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        TerminalLogger.header("New Session Initiated")
-        TerminalLogger.info("Input", inputs.get("input")[:100] + "...")
+        BPMNLogger.header("Diagnostic Session Initiated")
+        BPMNLogger.task_start("Input Reception", inputs.get("input")[:80] + "...")
         
-        result = langgraph_app.invoke({"messages": [HumanMessage(content=inputs.get("input", ""))], "decision_log": []})
+        result = langgraph_app.invoke({
+            "messages": [HumanMessage(content=inputs.get("input", ""))], 
+            "decision_log": []
+        })
         
         final_content = result["messages"][-1].content
         decision_log = result.get("decision_log", [])
-        TerminalLogger.header("Final Agent Verdict")
+        
+        BPMNLogger.header("Diagnostic Analysis Complete")
+        BPMNLogger.task_start("Output Generation", "Formatting final diagnostic response")
+        
         try:
             parsed = json.loads(final_content.replace("```json", "").replace("```", "").strip())
+            BPMNLogger.data_flow("REASONER", "OUTPUT_FORMATTER", "Diagnostic_Response")
             print(json.dumps(parsed, indent=4))
         except:
             print(final_content)
-        print("="*50 + "\n")
+        
+        BPMNLogger.workflow_complete("Session concluded successfully")
         
         return {"output": final_content, "decision_log": decision_log}
     
     def get_graph(self):
+        """Returns the executable workflow graph"""
         return langgraph_app.get_graph()
 
-agent_executor = LegacyAgentExecutorWrapper()
+agent_executor = BPMNProcessOrchestrator()
