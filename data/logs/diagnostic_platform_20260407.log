@@ -91,3 +91,10 @@
 2026-04-07 00:57:24 | src.utils.logger_setup | INFO     | <module>:32 | FastAPI backend started
 2026-04-07 00:58:59 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 33509.81ms
 2026-04-07 01:04:21 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 31699.15ms
+2026-04-07 01:16:12 | src.utils.logger_setup | INFO     | setup_logging:76 | Logging initialized. Log file: data\logs\diagnostic_platform_20260407.log
+2026-04-07 01:16:12 | src.utils.logger_setup | INFO     | <module>:32 | FastAPI backend started
+2026-04-07 01:16:40 | src.utils.logger_setup | INFO     | extract_and_validate_vision_data:62 | Vision data validated: {'rpm': 5000, 'speed': 119, 'load': 0, 'temp': 100, 'dtc': 'P0100'}
+2026-04-07 01:16:40 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Vision_Extraction took 5193.48ms
+2026-04-07 01:19:54 | src.utils.logger_setup | INFO     | extract_and_validate_vision_data:62 | Vision data validated: {'rpm': 5000, 'speed': 119, 'load': 0, 'temp': 100, 'dtc': 'P0100'}
+2026-04-07 01:19:54 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Vision_Extraction took 3796.00ms
+2026-04-07 01:20:47 | src.utils.logger_setup | INFO     | log_execution_time:108 | ⏱️ Agent_Execution took 27797.72ms

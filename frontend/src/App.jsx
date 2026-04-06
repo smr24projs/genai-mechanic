@@ -64,9 +64,9 @@ function App() {
 
   const sanitizeValue = (val) => {
     if (val === '' || val === null || val === undefined || val === 'NA') return 'NA';
-    // Match the first valid number (including decimals and commas)
-    const match = String(val).match(/[\d,.]+/);
-    return match ? match[0] : 'NA';
+    // Match the first valid number (including decimals, commas, and negative signs)
+    const match = String(val).match(/-?[\d,.]+/);
+    return match ? match[0].replace(/^(-?)0+(?=\d)/, '$1') : 'NA';
   };
 
   // Stats
@@ -338,21 +338,21 @@ function App() {
             <div className="input-row">
               <div className="input-group">
                 <label>RPM</label>
-                <input type="text" value={sensors.rpm} onChange={e => setSensors({ ...sensors, rpm: e.target.value })} />
+                <input type="text" value={sensors.rpm} onChange={e => setSensors({ ...sensors, rpm: e.target.value.replace(/^(-?)0+(?=\d)/, '$1') })} />
               </div>
               <div className="input-group">
                 <label>Load %</label>
-                <input type="text" value={sensors.load} onChange={e => setSensors({ ...sensors, load: e.target.value })} />
+                <input type="text" value={sensors.load} onChange={e => setSensors({ ...sensors, load: e.target.value.replace(/^(-?)0+(?=\d)/, '$1') })} />
               </div>
             </div>
             <div className="input-row">
               <div className="input-group">
                 <label>Speed (km/h)</label>
-                <input type="text" value={sensors.speed} onChange={e => setSensors({ ...sensors, speed: e.target.value })} />
+                <input type="text" value={sensors.speed} onChange={e => setSensors({ ...sensors, speed: e.target.value.replace(/^(-?)0+(?=\d)/, '$1') })} />
               </div>
               <div className="input-group">
                 <label>Temp °C</label>
-                <input type="text" value={sensors.temp} onChange={e => setSensors({ ...sensors, temp: e.target.value })} />
+                <input type="text" value={sensors.temp} onChange={e => setSensors({ ...sensors, temp: e.target.value.replace(/^(-?)0+(?=\d)/, '$1') })} />
               </div>
             </div>
           </div>
